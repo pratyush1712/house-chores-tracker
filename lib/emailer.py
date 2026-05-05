@@ -1,7 +1,7 @@
 # ruff: noqa: E402
 """
-chores_emailer.py
-=================
+lib/emailer.py
+==============
 CLI script for sending house chore reminder emails via SMTP (Gmail or any host).
 
 Environment variables (see .env.example):
@@ -25,6 +25,7 @@ load_dotenv()
 
 from lib.chores import (
     CHORE_ICONS,
+    CHORE_META,
     HOUSEMATES,
     get_rotation_week,
     get_week_number,
@@ -85,7 +86,9 @@ def _smtp_port_and_tls() -> tuple[int, bool]:
 
 SMTP_PORT, SMTP_USE_STARTTLS = _smtp_port_and_tls()
 
-_TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__))
+_TEMPLATE_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates"
+)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -101,8 +104,8 @@ def _load_template(filename: str, replacements: dict[str, str]) -> str:
     return html
 
 
-def _send_email(to_email: str, subject: str, html_body: str) -> None:
-    """Sends HTML via SMTP_SSL (port 465) or SMTP + STARTTLS (e.g. port 587)."""
+def _send_email(to_emails: list[str], subject: str, html_body: str) -> None:
+    """Sends HTML to all addresses in to_emails via SMTP_SSL or STARTTLS."""
     if not SMTP_LOGIN or not SMTP_PASSWORD:
         raise RuntimeError(
             "SMTP_USERNAME and SMTP_PASSWORD must be set in environment variables."
@@ -115,7 +118,7 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = SMTP_FROM
-    msg["To"] = to_email
+    msg["To"] = ", ".join(to_emails)
     msg.attach(MIMEText(html_body, "html", "utf-8"))
     payload = msg.as_string()
 
@@ -123,82 +126,51 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
             server.starttls()
             server.login(SMTP_LOGIN, SMTP_PASSWORD)
-            server.sendmail(SMTP_FROM, to_email, payload)
+            server.sendmail(SMTP_FROM, to_emails, payload)
     else:
         with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
             server.login(SMTP_LOGIN, SMTP_PASSWORD)
-            server.sendmail(SMTP_FROM, to_email, payload)
-    print(f"  Sent → {to_email}")
+            server.sendmail(SMTP_FROM, to_emails, payload)
+    print(f"  Sent → {', '.join(to_emails)}")
 
 
-# ── Monday ────────────────────────────────────────────────────────────────────
-
-
-def send_monday_reminders() -> None:
+def send_reminders(mode: str) -> None:
     """
-    Sends each housemate their Monday kick-off email and pre-populates
-    the database with 'pending' records for every task this week.
+    Send chore reminder emails to all housemates.
+
+    mode="tuesday" - kick-off email (email_tuesday.html); also seeds the DB.
+    mode="monday"  - check-in email (email_monday.html); subject personalised
+                     by current completion status.
     """
+    if mode not in ("tuesday", "monday"):
+        raise ValueError(f"mode must be 'tuesday' or 'monday', got {mode!r}")
+
     week_abs = get_week_number()
     week_num = get_rotation_week(week_abs)
     schedule = get_week_schedule(week_abs)
+    template = f"email_{mode}.html"
 
-    print(f"\nSending Monday reminders — Rotation Week {week_num} (abs {week_abs})...")
+    print(f"\nSending {mode} reminders - Week {week_num} (abs {week_abs})...")
 
     for name, chores in schedule.items():
-        main_chores = [c for c in chores if c != "Hallways"]
+        main_chores = [c for c in chores if not CHORE_META[c].get("shared")]
         if not main_chores:
+            print(f"  Skipping {name} — no primary chore assigned this week.")
             continue
         chore = main_chores[0]
         person_info = HOUSEMATES[name]
 
-        html = _load_template(
-            "email_monday.html",
-            {
-                "NAME": name,
-                "WEEK_NUM": str(week_num),
-                "CHORE_ICON": CHORE_ICONS[chore],
-                "CHORE_NAME": chore,
-            },
-        )
-        subject = f"Chores — Week {week_num}, you've got {chore}, {name}"
-        _send_email(person_info["email"], subject, html)
-
-    # Pre-populate the database so the dashboard shows all tasks immediately.
-    seed_week(week_abs, schedule)
-    print(f"  Database seeded for week {week_abs}.")
-
-
-# ── Sunday ────────────────────────────────────────────────────────────────────
-
-
-def send_sunday_reminders() -> None:
-    """
-    Sends each housemate a Sunday check-in email. If Redis is configured,
-    reads the current completion status to personalise the subject line.
-    """
-    week_abs = get_week_number()
-    week_num = get_rotation_week(week_abs)
-    schedule = get_week_schedule(week_abs)
-
-    print(f"\nSending Sunday check-ins — Rotation Week {week_num} (abs {week_abs})...")
-
-    for name, chores in schedule.items():
-        main_chores = [c for c in chores if c != "Hallways"]
-        if not main_chores:
-            continue
-        chore = main_chores[0]
-        person_info = HOUSEMATES[name]
-
-        # Personalise subject based on completion status (if DB available).
-        status = get_task_status(week_abs, name, chore)
-        if status == "done":
-            subject = f"Week {week_num} wrap-up — nice work, {name}!"
+        if mode == "tuesday":
+            subject = f"Chores - Week {week_num}, you've got {chore}, {name}"
         else:
-            subject = f"Week {week_num} check-in — did {chore} happen, {name}?"
+            status = get_task_status(week_abs, name, chore)
+            if status == "done":
+                subject = f"Week {week_num} wrap-up - nice work, {name}!"
+            else:
+                subject = f"Week {week_num} check-in - did {chore} happen, {name}?"
 
         html = _load_template(
-            "email_sunday.html",
+            template,
             {
                 "NAME": name,
                 "WEEK_NUM": str(week_num),
@@ -206,17 +178,20 @@ def send_sunday_reminders() -> None:
                 "CHORE_NAME": chore,
             },
         )
-        _send_email(person_info["email"], subject, html)
+        recipients = [str(person_info["email"])]
+        if "email2" in person_info:
+            recipients.append(str(person_info["email2"]))
+        _send_email(recipients, subject, html)
 
+    if mode == "tuesday":
+        seed_week(week_abs, schedule)
+        print(f"  Database seeded for week {week_abs}.")
 
-# ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     mode = sys.argv[1].lower() if len(sys.argv) > 1 else ""
-    if mode == "monday":
-        send_monday_reminders()
-    elif mode == "sunday":
-        send_sunday_reminders()
+    if mode in ("tuesday", "monday"):
+        send_reminders(mode)
     else:
-        print("Usage: python chores_emailer.py [monday|sunday]")
+        print("Usage: python -m lib.emailer [tuesday|monday]")
         sys.exit(1)

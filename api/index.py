@@ -2,7 +2,7 @@
 """
 api/index.py
 ============
-Flask application — served as a Vercel Python serverless function.
+Flask application - served as a Vercel Python serverless function.
 
 Vercel routes all traffic here via vercel.json. The module-level `app`
 object is what Vercel's runtime invokes.
@@ -23,12 +23,12 @@ Routes:
 
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # ── Bootstrap: patch sys.path before any local imports ────────────────────────
 # When Vercel runs this file, __file__ is /var/task/api/index.py.
-# The project root must be on sys.path so that `lib.*` and `chores_emailer`
-# are importable.
+# The project root must be on sys.path so that `lib.*` is importable.
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
@@ -43,20 +43,24 @@ from flask.typing import ResponseReturnValue
 from lib.chores import (
     CHORE_ICONS,
     CHORE_META,
+    CHORE_TASKS,
     HOUSE_START_DATE,
     HOUSEMATES,
+    POOLS,
     get_rotation_week,
     get_week_number,
     get_week_schedule,
 )
 from lib.db import get_all_stats, get_week_statuses, set_task_status
-from chores_emailer import send_monday_reminders, send_sunday_reminders
+from lib.emailer import send_reminders
 
 # ── App factory ───────────────────────────────────────────────────────────────
 
 app = Flask(__name__, static_folder=None)
 
-_DASHBOARD_HTML = os.path.abspath(os.path.join(_PROJECT_ROOT, "chores_dashboard.html"))
+_DASHBOARD_HTML = os.path.abspath(
+    os.path.join(_PROJECT_ROOT, "static", "dashboard.html")
+)
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -69,29 +73,17 @@ def dashboard() -> ResponseReturnValue:
 
 @app.route("/api/meta")
 def meta() -> ResponseReturnValue:
-    """
-    Returns static configuration data used by the dashboard on first load:
-    housemates, chore definitions, the 4-week rotation schedule, and the
-    current week's position in the rotation.
-    """
+    """Returns static configuration data used by the dashboard on first load."""
     current_week_abs = get_week_number()
     current_week_num = get_rotation_week(current_week_abs)
-
-    rotation: list[dict[str, object]] = []
-    for i in range(4):
-        rotation.append(
-            {
-                "week_num": i + 1,
-                "schedule": get_week_schedule(i),
-            }
-        )
 
     return jsonify(
         {
             "housemates": HOUSEMATES,
             "chore_icons": CHORE_ICONS,
             "chore_meta": CHORE_META,
-            "rotation": rotation,
+            "chore_tasks": CHORE_TASKS,
+            "pools": POOLS,
             "start_date": HOUSE_START_DATE.isoformat(),
             "current_week_abs": current_week_abs,
             "current_week_num": current_week_num,
@@ -116,8 +108,11 @@ def week_schedule(week_abs: int) -> ResponseReturnValue:
 
 def _schedule_response(week_abs: int) -> ResponseReturnValue:
     """Shared helper that builds a schedule + status response."""
-    schedule = get_week_schedule(week_abs)
-    statuses = get_week_statuses(week_abs, schedule)
+    try:
+        schedule = get_week_schedule(week_abs)
+        statuses = get_week_statuses(week_abs, schedule)
+    except Exception as exc:
+        return jsonify({"error": f"Database error: {exc}"}), 503
     return jsonify(
         {
             "week_abs": week_abs,
@@ -154,6 +149,9 @@ def mark_task() -> ResponseReturnValue:
     # Validate all required fields are present and typed correctly.
     if not isinstance(week_abs, int):
         abort(400, description="week_abs must be an integer")
+    current_week = get_week_number()
+    if week_abs < max(0, current_week - 1) or week_abs > current_week + 1:
+        abort(400, description="week_abs out of allowed range (current week ± 1)")
     if not isinstance(person, str) or person not in HOUSEMATES:
         abort(400, description=f"Unknown person: {person!r}")
     if not isinstance(chore, str) or chore not in CHORE_META:
@@ -161,7 +159,10 @@ def mark_task() -> ResponseReturnValue:
     if status not in ("done", "pending", "skipped"):
         abort(400, description="status must be 'done', 'pending', or 'skipped'")
 
-    set_task_status(week_abs, person, chore, status)  # type: ignore[arg-type]
+    try:
+        set_task_status(week_abs, person, chore, status)  # type: ignore[arg-type]
+    except Exception as exc:
+        return jsonify({"error": f"Database error: {exc}"}), 503
 
     return jsonify(
         {
@@ -191,45 +192,41 @@ def stats() -> ResponseReturnValue:
 
 
 @app.route("/api/send-reminders", methods=["POST"])
-def send_reminders() -> ResponseReturnValue:
+def send_reminders_route() -> ResponseReturnValue:
     """
     Triggers an email batch for the current week.
 
     Optional JSON body:
-      { "mode": "monday" | "sunday" | "auto" }
+      { "mode": "tuesday" | "monday" | "auto" }
 
     "auto" (default) inspects the current day in EST:
-      - Monday   → sends monday kick-off emails
-      - Sunday   → sends sunday check-in emails
-      - Any other day → sends monday kick-off emails as a manual override
+      - Tuesday  → sends tuesday assignment emails
+      - Monday   → sends monday check-in emails
+      - Any other day → sends tuesday assignment emails as a manual override
 
     Returns:
-      { "ok": true, "mode": "monday" | "sunday", "detail": "..." }
+      { "ok": true, "mode": "tuesday" | "monday", "detail": "..." }
     """
     body: dict[str, object] = request.get_json(force=True, silent=True) or {}
     requested_mode: object = body.get("mode", "auto")
 
     if not isinstance(requested_mode, str) or requested_mode not in (
+        "tuesday",
         "monday",
-        "sunday",
         "auto",
     ):
-        abort(400, description="mode must be 'monday', 'sunday', or 'auto'")
+        abort(400, description="mode must be 'tuesday', 'monday', or 'auto'")
 
     if requested_mode == "auto":
-        # Resolve day-of-week in US/Eastern (UTC-4 EDT / UTC-5 EST).
-        # Fixed -4 offset covers the active rotation period (May–Nov).
-        eastern = timezone(timedelta(hours=-4))
-        weekday = datetime.now(eastern).weekday()  # 0=Mon … 6=Sun
-        resolved_mode: str = "sunday" if weekday == 6 else "monday"
+        weekday = datetime.now(
+            ZoneInfo("America/New_York")
+        ).weekday()  # 0=Mon 1=Tue … 6=Sun
+        resolved_mode: str = "monday" if weekday == 0 else "tuesday"
     else:
         resolved_mode = requested_mode
 
     try:
-        if resolved_mode == "monday":
-            send_monday_reminders()
-        else:
-            send_sunday_reminders()
+        send_reminders(resolved_mode)
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
 
@@ -237,7 +234,7 @@ def send_reminders() -> ResponseReturnValue:
         {
             "ok": True,
             "mode": resolved_mode,
-            "detail": f"{'Monday kick-off' if resolved_mode == 'monday' else 'Sunday check-in'} emails sent.",
+            "detail": f"{'Tuesday assignment' if resolved_mode == 'tuesday' else 'Monday check-in'} emails sent.",
         }
     )
 
@@ -253,6 +250,11 @@ def bad_request(err: object) -> ResponseReturnValue:
 @app.errorhandler(404)
 def not_found(err: object) -> ResponseReturnValue:
     return jsonify({"error": "Not found"}), 404
+
+
+@app.errorhandler(500)
+def internal_error(err: object) -> ResponseReturnValue:
+    return jsonify({"error": "Internal server error"}), 500
 
 
 # ── Local dev entry point ─────────────────────────────────────────────────────

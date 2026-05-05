@@ -18,13 +18,13 @@
       }
 
       :root {
-        --bone: #f7f6f3;
-        --surface: #ffffff;
-        --border: #eaeaea;
-        --border-md: rgba(0, 0, 0, 0.08);
-        --text: #111111;
-        --muted: #787774;
-        --faint: #ababab;
+        --bone: #f0e9d6;
+        --surface: #f9f4e8;
+        --border: #c9b99a;
+        --border-md: rgba(80, 55, 20, 0.15);
+        --text: #2c1a06;
+        --muted: #5a3e22;
+        --faint: #7a5c3a;
         --serif: "Instrument Serif", Georgia, serif;
         --sans: "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
         --spring: cubic-bezier(0.16, 1, 0.3, 1);
@@ -55,13 +55,13 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        color: #956400;
-        background: #fbf3db;
-        border: 1px solid #efe3b2;
+        color: #5a2e00;
+        background: #e8d4a8;
+        border: 1px solid #c4a060;
         padding: 3px 9px 3px 7px;
         border-radius: 9999px;
         margin-bottom: 12px;
@@ -82,9 +82,15 @@
       }
 
       .header-meta {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--faint);
         margin-top: 6px;
+        word-spacing: 0.08em;
+      }
+
+      .header-meta strong {
+        color: var(--muted);
+        font-weight: 700;
       }
 
       .live-badge {
@@ -95,7 +101,7 @@
         border: 1px solid var(--border);
         border-radius: 9999px;
         padding: 6px 14px 6px 10px;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         color: var(--text);
       }
@@ -104,7 +110,7 @@
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #346538;
+        background: #2a5c2d;
         flex-shrink: 0;
       }
 
@@ -132,7 +138,7 @@
         border-bottom: 2px solid transparent;
         padding: 14px 18px;
         font-family: var(--sans);
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 600;
         color: var(--muted);
         cursor: pointer;
@@ -156,7 +162,7 @@
         width: 5px;
         height: 5px;
         border-radius: 50%;
-        background: #346538;
+        background: #2a5c2d;
         margin-left: 6px;
         vertical-align: middle;
         position: relative;
@@ -201,7 +207,7 @@
       }
 
       .week-date-range {
-        font-size: 13px;
+        font-size: 14px;
         color: var(--faint);
         letter-spacing: 0.01em;
       }
@@ -209,7 +215,7 @@
       /* ── Chore grid ──────────────────────────────────────────────────── */
       /*
    * 4 cards in a row at wide widths. Hallways is visually distinct
-   * but sits in the same grid — it gets a green tint via inline style.
+   * but sits in the same grid - it gets a green tint via inline style.
    */
       .chore-grid {
         display: grid;
@@ -242,7 +248,7 @@
       }
 
       .card-label {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
@@ -250,7 +256,7 @@
       }
 
       .card-chore {
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 700;
         color: var(--text);
         line-height: 1.2;
@@ -268,7 +274,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 600;
         color: var(--text);
       }
@@ -288,7 +294,7 @@
         padding: 8px 12px;
         border-radius: 6px;
         font-family: var(--sans);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         cursor: pointer;
         border: 1px solid var(--border);
@@ -302,7 +308,7 @@
         align-self: flex-start;
       }
       .mark-btn:hover {
-        background: #f0ede8;
+        background: #dfd3bb;
         color: var(--text);
       }
       .mark-btn:active {
@@ -314,12 +320,12 @@
       }
 
       .mark-btn.done {
-        background: #edf3ec;
-        color: #346538;
-        border-color: #c8dec8;
+        background: #d4e8d0;
+        color: #1c4a20;
+        border-color: #8bbf8e;
       }
       .mark-btn.done:hover {
-        background: #e2eee1;
+        background: #c4ddc0;
       }
 
       .mark-btn.loading {
@@ -330,13 +336,41 @@
 
       /* Hallways card: green-tinted */
       .card.hallways {
-        background: #f7fcf7;
-        border-color: #d4e8d4;
+        background: #e8f0e4;
+        border-color: #8bbf8e;
+      }
+
+      /* Task checklist */
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding-top: 2px;
+        border-top: 1px solid var(--border);
+      }
+
+      .task-item {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        font-size: 12.5px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .task-item::before {
+        content: "";
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--faint);
+        flex-shrink: 0;
+        margin-top: 5px;
       }
 
       /* ── Rotation reference table ────────────────────────────────────── */
       .section-label {
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.16em;
         text-transform: uppercase;
@@ -348,19 +382,22 @@
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 12px;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
         margin-bottom: 48px;
       }
 
       table {
         width: 100%;
+        min-width: 560px;
         border-collapse: collapse;
-        font-size: 13px;
+        font-size: 14px;
       }
 
       thead th {
         background: var(--bone);
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
@@ -381,7 +418,7 @@
       }
 
       tbody tr.is-now td {
-        background: #fdfcfa;
+        background: #ede4cc;
       }
       tbody tr.is-now td:first-child {
         border-left: 2px solid var(--text);
@@ -391,7 +428,7 @@
         display: inline-block;
         background: var(--text);
         color: var(--surface);
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
@@ -405,7 +442,7 @@
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         padding: 2px 8px;
         border-radius: 5px;
@@ -425,9 +462,9 @@
       .skel {
         background: linear-gradient(
           90deg,
-          #edeae4 25%,
-          #e4e0d9 50%,
-          #edeae4 75%
+          #ddd0b0 25%,
+          #cfc0a0 50%,
+          #ddd0b0 75%
         );
         background-size: 1200px 100%;
         animation: shimmer 1.3s ease infinite;
@@ -440,12 +477,12 @@
 
       /* ── Error ───────────────────────────────────────────────────────── */
       .err {
-        background: #fdebec;
-        border: 1px solid #f5c5c7;
+        background: #f2d5d0;
+        border: 1px solid #c4776a;
         border-radius: 8px;
         padding: 12px 16px;
-        font-size: 13px;
-        color: #9f2f2d;
+        font-size: 14px;
+        color: #7a2018;
         margin-bottom: 20px;
       }
 
@@ -455,13 +492,39 @@
         padding-top: 20px;
         display: flex;
         justify-content: space-between;
-        gap: 8px;
+        gap: 12px;
         flex-wrap: wrap;
       }
       .footer span {
-        font-size: 11px;
+        font-size: 12.5px;
+        color: var(--faint);
+        letter-spacing: 0.03em;
+        word-spacing: 0.08em;
+      }
+      .footer span strong {
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .footer-credit {
+        width: 100%;
+        text-align: center;
+        font-size: 12px;
         color: var(--faint);
         letter-spacing: 0.04em;
+        margin-top: 4px;
+      }
+      .footer-credit a {
+        color: var(--muted);
+        text-decoration: none;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1px;
+        transition:
+          color 160ms,
+          border-color 160ms;
+      }
+      .footer-credit a:hover {
+        color: var(--text);
+        border-color: var(--muted);
       }
 
       /* ── Send-reminders button ───────────────────────────────────────── */
@@ -472,7 +535,7 @@
         padding: 8px 14px;
         border-radius: 7px;
         font-family: var(--sans);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         letter-spacing: 0.02em;
         cursor: pointer;
@@ -485,7 +548,7 @@
         white-space: nowrap;
       }
       .send-btn:hover {
-        background: #2f2f2f;
+        background: #1a0c02;
       }
       .send-btn:active {
         transform: scale(0.97);
@@ -504,7 +567,7 @@
         opacity: 0;
         background: var(--text);
         color: var(--surface);
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
         padding: 11px 18px;
         border-radius: 9px;
@@ -518,7 +581,7 @@
         text-align: center;
       }
       .toast.toast-err {
-        background: #9f2f2d;
+        background: #7a2018;
       }
       .toast.show {
         opacity: 1;
@@ -547,30 +610,59 @@
       }
 
       /* ── Responsive ──────────────────────────────────────────────────── */
-      @media (max-width: 860px) {
+
+      /* 4-col → 2-col at 768px (tablet portrait) */
+      @media (max-width: 768px) {
         .chore-grid {
           grid-template-columns: repeat(2, 1fr);
         }
       }
+
+      /* 640px — mobile landscape and below */
       @media (max-width: 640px) {
         .header {
-          padding: 28px 20px 24px;
+          padding: 24px 16px 20px;
+          gap: 16px;
         }
         .nav {
-          padding: 0 20px;
+          padding: 0 16px;
         }
         .main {
-          padding: 28px 20px 60px;
+          padding: 24px 16px 60px;
         }
         .chore-grid {
           grid-template-columns: 1fr;
         }
+        .week-heading-title {
+          font-size: 22px;
+        }
+        .footer {
+          flex-direction: column;
+          gap: 4px;
+        }
         table {
-          font-size: 12px;
+          font-size: 13px;
         }
         thead th,
         tbody td {
           padding: 10px 12px;
+        }
+      }
+
+      /* 375px — standard phone */
+      @media (max-width: 375px) {
+        .header {
+          padding: 20px 14px 16px;
+        }
+        .nav {
+          padding: 0 14px;
+        }
+        .main {
+          padding: 20px 14px 52px;
+        }
+        .chore-chip {
+          font-size: 11px;
+          padding: 2px 6px;
         }
       }
     </style>
@@ -598,7 +690,9 @@
         </div>
         <h1>Chores <em>Tracker</em></h1>
         <p class="header-meta">
-          5 people &middot; 4-week rotation &middot; resets every Monday
+          5 people &middot; <strong>assigned:</strong> tuesday &middot;
+          <strong>due:</strong> monday &middot;
+          <strong>trash pickup:</strong> monday
         </p>
       </div>
       <div
@@ -650,18 +744,6 @@
       >
         This Week
       </button>
-      <button class="tab" data-tab="1" onclick="switchTab('1')" role="tab">
-        Week 1
-      </button>
-      <button class="tab" data-tab="2" onclick="switchTab('2')" role="tab">
-        Week 2
-      </button>
-      <button class="tab" data-tab="3" onclick="switchTab('3')" role="tab">
-        Week 3
-      </button>
-      <button class="tab" data-tab="4" onclick="switchTab('4')" role="tab">
-        Week 4
-      </button>
       <span class="nav-sep" aria-hidden="true"></span>
       <button
         class="tab"
@@ -669,7 +751,7 @@
         onclick="switchTab('rotation')"
         role="tab"
       >
-        All weeks
+        Upcoming
       </button>
     </nav>
 
@@ -692,6 +774,15 @@
 
       // ── SVG icon fragments (all at 14×14, stroke-width 1.75) ─────────────────────
 
+      /** Escapes a string for safe injection into innerHTML. */
+      function esc(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
       const ICONS = {
         check: `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3.5 3.5L13 5"/></svg>`,
         circle: `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/></svg>`,
@@ -702,37 +793,19 @@
         hallway: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l5-5"/><path d="M7.5 16L13 6c.5-.9 1.7-1.2 2.6-.7l1.2.7c.9.5 1.1 1.7.5 2.5L12 17l-1.5-1z"/></svg>`,
       };
 
-      // Chore display names + icon key + colour palette
-      const CHORE_DEF = {
-        Bathroom: {
-          icon: "bath",
-          color: "#7c3aed",
-          bg: "#F5F3FF",
-          border: "#DDD6FE",
-          textColor: "#5B21B6",
-        },
-        Trash: {
-          icon: "trash",
-          color: "#ea580c",
-          bg: "#FFF7ED",
-          border: "#FED7AA",
-          textColor: "#C2410C",
-        },
-        Kitchen: {
-          icon: "kitchen",
-          color: "#d97706",
-          bg: "#FFFBEB",
-          border: "#FDE68A",
-          textColor: "#B45309",
-        },
-        Hallways: {
-          icon: "hallway",
-          color: "#16a34a",
-          bg: "#F0FDF4",
-          border: "#BBF7D0",
-          textColor: "#15803D",
-        },
-      };
+      // Chore styles and icon keys come from META.chore_meta after init.
+      // Access via choreDef(chore) - do not use before META is loaded.
+
+      function choreDef(chore) {
+        const m = META.chore_meta[chore];
+        return {
+          icon: m.icon,
+          color: m.color,
+          bg: m.bg,
+          border: m.border,
+          textColor: m.text_color,
+        };
+      }
 
       // ── Boot ─────────────────────────────────────────────────────────────────────
 
@@ -745,21 +818,9 @@
           return;
         }
 
-        document.getElementById("live-label").textContent =
-          `Rotation week ${META.current_week_num} of 4`;
-
-        // Label the "This Week" tab with the actual rotation slot
-        document.querySelector('[data-tab="current"]').textContent =
-          `This Week (W${META.current_week_num})`;
-
-        // Dot appended via CSS ::after — keep data-tab="current" on the button
-
-        // Mark the matching numbered tab too
-        document.querySelectorAll(".tab").forEach((btn) => {
-          if (btn.dataset.tab === String(META.current_week_num)) {
-            btn.classList.add("is-current-num");
-          }
-        });
+        document.getElementById("live-label").textContent = weekDateLabel(
+          META.current_week_abs,
+        );
 
         await switchTab("current");
       })();
@@ -780,9 +841,7 @@
           return;
         }
 
-        const weekNum =
-          tab === "current" ? META.current_week_num : parseInt(tab, 10);
-        const weekAbs = weekAbsFor(weekNum);
+        const weekAbs = META.current_week_abs;
 
         if (cache.has(weekAbs)) {
           renderWeek(cache.get(weekAbs));
@@ -799,22 +858,21 @@
         }
       }
 
-      /** Maps a rotation week number (1–4) to an absolute week index. */
-      function weekAbsFor(weekNum) {
-        if (!META) return weekNum - 1;
-        return (
-          META.current_week_abs - (META.current_week_num - 1) + (weekNum - 1)
-        );
-      }
-
-      /** Formats a Monday date string for a given absolute week index. */
+      /**
+       * Formats the week range for a given absolute week index.
+       * Weeks run Tue → Mon (assigned Tuesday, trash/deadline Monday).
+       */
       function weekDateLabel(weekAbs) {
-        const start = new Date(META.start_date);
-        const monday = new Date(start.getTime() + weekAbs * 7 * 86400000);
-        const sunday = new Date(monday.getTime() + 6 * 86400000);
+        // Parse as local midnight to avoid UTC-offset date shifts.
+        const start = new Date(`${META.start_date}T00:00:00`);
+        // start_date is the Monday anchoring week 0; +1 day lands on Tuesday.
+        const tuesday = new Date(
+          start.getTime() + (weekAbs * 7 + 1) * 86400000,
+        );
+        const monday = new Date(tuesday.getTime() + 6 * 86400000);
         const fmt = (d) =>
           d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        return `${fmt(monday)} – ${fmt(sunday)}`;
+        return `${fmt(tuesday)} – ${fmt(monday)}`;
       }
 
       // ── Renderers ─────────────────────────────────────────────────────────────────
@@ -831,28 +889,26 @@
        * @param {object} data - /api/schedule response
        */
       function renderWeek(data) {
-        const { week_num, week_abs, is_current, schedule, statuses } = data;
+        const { week_abs, schedule, statuses } = data;
         const dateRange = weekDateLabel(week_abs);
 
-        const headingSuffix = is_current ? ` <em>this week</em>` : "";
-        const heading = `Week ${week_num}${headingSuffix}`;
-
-        const cards = ["Bathroom", "Trash", "Kitchen", "Hallways"]
+        const cards = Object.keys(META.pools)
           .map((chore) => buildCard({ chore, schedule, statuses, week_abs }))
           .join("");
 
         document.getElementById("main").innerHTML = `
     <div class="week-heading fade">
       <div class="week-heading-row">
-        <div class="week-heading-title">${heading}</div>
+        <div class="week-heading-title">This week <em>now</em></div>
         <span class="week-date-range">${dateRange}</span>
       </div>
     </div>
     <div class="chore-grid fade" style="animation-delay:50ms">${cards}</div>
-    ${buildRotationTable(week_num)}
+    ${buildRotationTable()}
     <div class="footer fade" style="animation-delay:200ms">
-      <span>house chores &middot; resets every monday</span>
-      <span>statuses synced via Upstash Redis</span>
+      <span>house chores &middot; <strong>assigned:</strong> Tue &middot; <strong>due:</strong> Mon</span>
+      <span><strong>statuses</strong> synced via Upstash Redis</span>
+      <p class="footer-credit">built by <a href="https://pratyushsudhakar.com" target="_blank" rel="noopener">Pratyush Sudhakar</a></p>
     </div>`;
       }
 
@@ -861,10 +917,8 @@
        * @param {{chore:string, schedule:object, statuses:object, week_abs:number}} p
        */
       function buildCard({ chore, schedule, statuses, week_abs }) {
-        const def = CHORE_DEF[chore];
-        const isHallways = chore === "Hallways";
+        const def = choreDef(chore);
 
-        // Derive assignees from schedule
         const assignees = Object.entries(schedule)
           .filter(([, chores]) => chores.includes(chore))
           .map(([name]) => name);
@@ -876,9 +930,14 @@
         const assigneeHTML = assignees
           .map((name) => {
             const color = META.housemates[name]?.color ?? "#787774";
+            const trashDay = META.housemates[name]?.trash_day;
+            const daySuffix =
+              chore === "Trash" && trashDay
+                ? `<span style="opacity:0.55;font-size:0.72em;margin-left:3px">(${esc(trashDay)})</span>`
+                : "";
             return `<div class="assignee">
-      <span class="assignee-dot" style="background:${color}"></span>
-      ${name}
+      <span class="assignee-dot" style="background:${esc(color)}"></span>
+      ${esc(name)}${daySuffix}
     </div>`;
           })
           .join("");
@@ -889,14 +948,19 @@
         const btnLabel = allDone ? "Done" : "Mark done";
         const btnIcon = allDone ? ICONS.check : ICONS.circle;
 
+        const tasks = (META.chore_tasks[chore] ?? [])
+          .map((t) => `<div class="task-item">${esc(t)}</div>`)
+          .join("");
+
         return `
-    <div class="card${isHallways ? " hallways" : ""}">
+    <div class="card${chore === "Hallways" ? " hallways" : ""}">
       <div class="card-accent" style="background:${def.color}"></div>
       <div>
         <div class="card-label">${chore}</div>
         <div class="card-chore">${chore}</div>
       </div>
       <div class="assignees">${assigneeHTML}</div>
+      ${tasks ? `<div class="task-list">${tasks}</div>` : ""}
       <button class="mark-btn ${btnClass}"
         data-chore="${chore}"
         data-week-abs="${week_abs}"
@@ -908,66 +972,61 @@
     </div>`;
       }
 
-      /** Renders the full rotation reference table (all 4 weeks). */
       function renderRotation() {
         document.getElementById("main").innerHTML = `
-    <p class="section-label fade">4-week rotation</p>
-    ${buildRotationTable(META.current_week_num, true)}
+    <p class="section-label fade">Upcoming rotation</p>
+    ${buildRotationTable()}
     <div class="footer fade" style="animation-delay:160ms">
-      <span>house chores &middot; resets every monday</span>
-      <span>statuses synced via Upstash Redis</span>
+      <span>house chores &middot; <strong>assigned:</strong> Tue &middot; <strong>due:</strong> Mon</span>
+      <span><strong>statuses</strong> synced via Upstash Redis</span>
+      <p class="footer-credit">built by <a href="https://pratyushsudhakar.com" target="_blank" rel="noopener">Pratyush Sudhakar</a></p>
     </div>`;
       }
 
-      /**
-       * Builds the rotation reference table HTML.
-       * @param {number} currentWeekNum - highlighted week (1–4)
-       * @param {boolean} [standalone=false] - if true, show section label
-       */
-      function buildRotationTable(currentWeekNum, standalone = false) {
+      function buildRotationTable() {
         if (!META) return "";
 
-        const rows = META.rotation
-          .map(({ week_num, schedule }) => {
-            const isCurrent = week_num === currentWeekNum;
+        const chores = Object.keys(META.pools);
+        const SLOTS = 6;
+        const cur = META.current_week_abs;
 
-            const bath = findAssignee(schedule, "Bathroom");
-            const trash = findAssignees(schedule, "Trash");
-            const kitchen = findAssignee(schedule, "Kitchen");
-
-            const d = CHORE_DEF;
-            const chip = (chore, label) =>
-              `<span class="chore-chip" style="background:${d[chore].bg};color:${d[chore].textColor};border-color:${d[chore].border}">
-        ${ICONS[d[chore].icon]} ${label}
+        const chip = (chore, names) => {
+          const d = choreDef(chore);
+          const label = names
+            .map((n) => {
+              const trashDay = META.housemates[n]?.trash_day;
+              return chore === "Trash" && trashDay ? `${n} (${trashDay})` : n;
+            })
+            .join(" + ");
+          return `<span class="chore-chip" style="background:${d.bg};color:${d.textColor};border-color:${d.border}">
+        ${ICONS[d.icon]} ${label}
       </span>`;
+        };
 
-            return `<tr class="${isCurrent ? "is-now" : ""}">
-      <td><strong>Week ${week_num}</strong>${isCurrent ? `<span class="now-pill">now</span>` : ""}</td>
-      <td>${chip("Bathroom", bath)}</td>
-      <td>${trash.map((n) => chip("Trash", n)).join(" ")}</td>
-      <td>${chip("Kitchen", kitchen)}</td>
-      <td>${chip("Hallways", "Everyone")}</td>
+        const rows = Array.from({ length: SLOTS }, (_, i) => {
+          const weekAbs = cur + i;
+          const isCurrent = i === 0;
+          const dateRange = weekDateLabel(weekAbs);
+          const nowPill = isCurrent ? `<span class="now-pill">now</span>` : "";
+          const weekLabel = `${dateRange}${nowPill}`;
+          const cells = chores
+            .map((chore) => {
+              const pool = META.pools[chore];
+              const assignees = pool[weekAbs % pool.length];
+              return `<td>${chip(chore, assignees)}</td>`;
+            })
+            .join("");
+          return `<tr class="${isCurrent ? "is-now" : ""}">
+      <td><strong>${weekLabel}</strong></td>
+      ${cells}
     </tr>`;
-          })
-          .join("");
+        }).join("");
 
-        const label = standalone
-          ? `<p class="section-label fade">4-week rotation</p>`
-          : `<p class="section-label">Rotation reference</p>`;
-
+        const headers = chores.map((c) => `<th>${c}</th>`).join("");
         return `
-    ${label}
-    <div class="ref-table-wrap fade" style="animation-delay:${standalone ? 60 : 80}ms">
+    <div class="ref-table-wrap fade" style="animation-delay:80ms">
       <table>
-        <thead>
-          <tr>
-            <th>Week</th>
-            <th>Bathroom</th>
-            <th>Trash</th>
-            <th>Kitchen</th>
-            <th>Hallways</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Period</th>${headers}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -1017,19 +1076,6 @@
 
       // ── Helpers ───────────────────────────────────────────────────────────────────
 
-      function findAssignee(schedule, chore) {
-        return (
-          Object.entries(schedule).find(([, c]) => c.includes(chore))?.[0] ??
-          "—"
-        );
-      }
-
-      function findAssignees(schedule, chore) {
-        return Object.entries(schedule)
-          .filter(([, c]) => c.includes(chore))
-          .map(([n]) => n);
-      }
-
       async function api(url, opts = {}) {
         const res = await fetch(url, opts);
         if (!res.ok) throw new Error(`${res.status}`);
@@ -1053,6 +1099,8 @@
        * Shows a toast with the result and disables the button during the request.
        */
       async function sendReminders() {
+        if (!confirm("Send reminder emails to all housemates now?")) return;
+
         const btn = document.getElementById("send-btn");
         const originalHTML = btn.innerHTML;
 

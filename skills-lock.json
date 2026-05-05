@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "code-polish": {
+      "source": "paulrberg/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/code-polish/SKILL.md",
+      "computedHash": "12282aa8e1ebad3b08b2ea601e434cab0b83c3ce13d087fbda9f320ed07d8bd4"
+    }
+  }
+}
