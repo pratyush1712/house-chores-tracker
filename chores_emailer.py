@@ -108,7 +108,9 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
             "SMTP_USERNAME and SMTP_PASSWORD must be set in environment variables."
         )
     if not SMTP_FROM:
-        raise RuntimeError("SMTP_FROM_EMAIL or SMTP_USERNAME must be set for the From address.")
+        raise RuntimeError(
+            "SMTP_FROM_EMAIL or SMTP_USERNAME must be set for the From address."
+        )
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
