@@ -207,6 +207,7 @@ def send_reminders_route() -> ResponseReturnValue:
     Returns:
       { "ok": true, "mode": "tuesday" | "monday", "detail": "..." }
     """
+
     body: dict[str, object] = request.get_json(force=True, silent=True) or {}
     requested_mode: object = body.get("mode", "auto")
 
@@ -218,9 +219,8 @@ def send_reminders_route() -> ResponseReturnValue:
         abort(400, description="mode must be 'tuesday', 'monday', or 'auto'")
 
     if requested_mode == "auto":
-        weekday = datetime.now(
-            ZoneInfo("America/New_York")
-        ).weekday()  # 0=Mon 1=Tue … 6=Sun
+        now = datetime.now(ZoneInfo("America/New_York"))
+        weekday = now.weekday()  # 0=Mon 1=Tue … 6=Sun
         resolved_mode: str = "monday" if weekday == 0 else "tuesday"
     else:
         resolved_mode = requested_mode

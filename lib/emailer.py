@@ -18,6 +18,7 @@ import smtplib
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import formataddr
 
 from dotenv import load_dotenv
 
@@ -86,6 +87,15 @@ def _smtp_port_and_tls() -> tuple[int, bool]:
 
 SMTP_PORT, SMTP_USE_STARTTLS = _smtp_port_and_tls()
 
+# ── Fallback SMTP config (Gmail App Password) ──────────────────────────────────
+SMTP_FALLBACK_HOST: str = "smtp.gmail.com"
+SMTP_FALLBACK_PORT: int = 587
+SMTP_FALLBACK_LOGIN: str = os.getenv("SMTP_FALLBACK_USERNAME", "")
+SMTP_FALLBACK_PASSWORD: str = os.getenv("SMTP_FALLBACK_PASSWORD", "")
+SMTP_FALLBACK_FROM: str = (
+    os.getenv("SMTP_FALLBACK_FROM_EMAIL", "") or SMTP_FALLBACK_LOGIN
+)
+
 _TEMPLATE_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates"
 )
@@ -104,8 +114,35 @@ def _load_template(filename: str, replacements: dict[str, str]) -> str:
     return html
 
 
-def _send_email(to_emails: list[str], subject: str, html_body: str) -> None:
-    """Sends HTML to all addresses in to_emails via SMTP_SSL or STARTTLS."""
+def _attempt_smtp(
+    host: str,
+    port: int,
+    use_starttls: bool,
+    login: str,
+    password: str,
+    from_addr: str,
+    to_emails: list[str],
+    payload: str,
+) -> None:
+    """Low-level SMTP send - raises on any connection or auth failure."""
+    if use_starttls:
+        with smtplib.SMTP(host, port) as server:
+            server.starttls()
+            server.login(login, password)
+            server.sendmail(from_addr, to_emails, payload)
+    else:
+        with smtplib.SMTP_SSL(host, port) as server:
+            server.login(login, password)
+            server.sendmail(from_addr, to_emails, payload)
+
+
+def _send_email(
+    to_emails: list[str], subject: str, html_body: str, text_body: str
+) -> None:
+    """
+    Sends a multipart/alternative email (plain-text + HTML).
+    Tries the primary SMTP first; falls back to Gmail if it fails.
+    """
     if not SMTP_LOGIN or not SMTP_PASSWORD:
         raise RuntimeError(
             "SMTP_USERNAME and SMTP_PASSWORD must be set in environment variables."
@@ -115,23 +152,56 @@ def _send_email(to_emails: list[str], subject: str, html_body: str) -> None:
             "SMTP_FROM_EMAIL or SMTP_USERNAME must be set for the From address."
         )
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = SMTP_FROM
-    msg["To"] = ", ".join(to_emails)
-    msg.attach(MIMEText(html_body, "html", "utf-8"))
-    payload = msg.as_string()
+    def _build_payload(from_addr: str) -> str:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = formataddr(("House Chores Tracker", from_addr))
+        msg["To"] = ", ".join(to_emails)
+        # Plain-text must come first; clients render the last supported part (HTML).
+        msg.attach(MIMEText(text_body, "plain", "utf-8"))
+        msg.attach(MIMEText(html_body, "html", "utf-8"))
+        return msg.as_string()
 
-    if SMTP_USE_STARTTLS:
-        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_LOGIN, SMTP_PASSWORD)
-            server.sendmail(SMTP_FROM, to_emails, payload)
-    else:
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
-            server.login(SMTP_LOGIN, SMTP_PASSWORD)
-            server.sendmail(SMTP_FROM, to_emails, payload)
-    print(f"  Sent → {', '.join(to_emails)}")
+    # ── Primary send ──────────────────────────────────────────────────────────
+    primary_err: Exception | None = None
+    try:
+        _attempt_smtp(
+            SMTP_HOST,
+            SMTP_PORT,
+            SMTP_USE_STARTTLS,
+            SMTP_LOGIN,
+            SMTP_PASSWORD,
+            SMTP_FROM,
+            to_emails,
+            _build_payload(SMTP_FROM),
+        )
+        print(f"  Sent (primary) → {', '.join(to_emails)}")
+        return
+    except Exception as exc:
+        primary_err = exc  # copy out - Python deletes 'exc' at end of except block
+
+    # ── Fallback: Gmail ───────────────────────────────────────────────────────
+    if not SMTP_FALLBACK_LOGIN or not SMTP_FALLBACK_PASSWORD:
+        raise RuntimeError(
+            f"Primary SMTP failed and no fallback configured: {primary_err}"
+        )
+
+    try:
+        _attempt_smtp(
+            SMTP_FALLBACK_HOST,
+            SMTP_FALLBACK_PORT,
+            True,
+            SMTP_FALLBACK_LOGIN,
+            SMTP_FALLBACK_PASSWORD,
+            SMTP_FALLBACK_FROM,
+            to_emails,
+            _build_payload(SMTP_FALLBACK_FROM),
+        )
+        print(f"  Sent (fallback) → {', '.join(to_emails)}")
+    except Exception as exc:
+        raise RuntimeError(
+            f"Both primary and fallback SMTP failed. Primary: {primary_err}. Fallback: {exc}"
+        ) from exc
 
 
 def send_reminders(mode: str) -> None:
@@ -155,7 +225,7 @@ def send_reminders(mode: str) -> None:
     for name, chores in schedule.items():
         main_chores = [c for c in chores if not CHORE_META[c].get("shared")]
         if not main_chores:
-            print(f"  Skipping {name} — no primary chore assigned this week.")
+            print(f"  Skipping {name} - no primary chore assigned this week.")
             continue
         chore = main_chores[0]
         person_info = HOUSEMATES[name]
@@ -178,10 +248,34 @@ def send_reminders(mode: str) -> None:
                 "CHORE_NAME": chore,
             },
         )
+
+        if mode == "tuesday":
+            text = (
+                f"Hi {name},\n\n"
+                f"Your chore for Week {week_num}: {chore}\n"
+                f"Complete it any day before Monday.\n\n"
+                f"Shared chore (everyone): Hallways - quick sweep, every week.\n\n"
+                f"No strict deadline, just get it done before the week is out.\n"
+                f"If you need to swap, let the house know.\n\n"
+                f"Track it here: https://autumn-legacy.site\n\n"
+                f"-- House Chores Tracker"
+            )
+        else:
+            text = (
+                f"Hi {name},\n\n"
+                f"Week {week_num} check-in - did {chore} get done?\n\n"
+                f"Your chore: {chore}\n"
+                f"Shared chore (everyone): Hallways\n\n"
+                f"Update your status: https://autumn-legacy.site\n\n"
+                f"If something came up, just let the house know. No drama.\n"
+                f"New rotation starts Tuesday.\n\n"
+                f"-- House Chores Tracker"
+            )
+
         recipients = [str(person_info["email"])]
         if "email2" in person_info:
             recipients.append(str(person_info["email2"]))
-        _send_email(recipients, subject, html)
+        _send_email(recipients, subject, html, text)
 
     if mode == "tuesday":
         seed_week(week_abs, schedule)
