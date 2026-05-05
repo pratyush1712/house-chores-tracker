@@ -99,3 +99,4 @@ cython_debug/
 
 .cursor
 .vercel
+.DS_Store
