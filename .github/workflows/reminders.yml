@@ -1,26 +1,28 @@
 name: Chore Reminders
 
 # ── Schedule (all times UTC) ───────────────────────────────────────────────────
-# Eastern time observes DST, so two offsets apply across the year:
-#   EDT (Mar – Nov, UTC-4):  9 AM EDT = 13:00 UTC  |  6 PM EDT = 22:00 UTC
-#   EST (Nov – Mar, UTC-5):  9 AM EST = 14:00 UTC  |  6 PM EST = 23:00 UTC
+# Eastern time observes DST:
+#   EDT (Mar–Nov, UTC-4):  9 AM EDT = 13:00 UTC  |  6 PM EDT = 22:00 UTC
+#   EST (Nov–Mar, UTC-5):  9 AM EST = 14:00 UTC  |  6 PM EST = 23:00 UTC
 #
-# Crons below target EDT (spring/summer rotation). Update to 13 / 23 in winter.
+# Crons below target EDT. Update hours to 14/23 in November when clocks fall back.
 # ──────────────────────────────────────────────────────────────────────────────
 on:
   schedule:
-    - cron: "0 13 * * 1" # Monday   9:00 AM EDT
-    - cron: "0 22 * * 0" # Sunday   6:00 PM EDT
+    - cron: "0 13 * * 1"   # Monday  9:00 AM EDT  → monday emails
+    - cron: "0 22 * * 0"   # Sunday  6:00 PM EDT  → sunday emails
 
-  # Manual trigger for testing — choose which email to send.
+  # Manual trigger — dispatch from the Actions tab or via the dashboard button.
+  # "auto" detects today's weekday in EST and picks monday/sunday automatically.
   workflow_dispatch:
     inputs:
       mode:
-        description: "Email type to send"
+        description: "Which email batch to send"
         required: true
-        default: "monday"
+        default: "auto"
         type: choice
         options:
+          - auto
           - monday
           - sunday
 
@@ -44,26 +46,40 @@ jobs:
         run: pip install -r requirements.txt
 
       # 4. Resolve which mode to run:
-      #    - workflow_dispatch → use the chosen input
-      #    - Monday cron       → monday
-      #    - Sunday cron       → sunday
+      #    workflow_dispatch/auto → inspect weekday in EST (UTC-4)
+      #    workflow_dispatch/monday|sunday → use chosen value directly
+      #    schedule Monday cron  → monday
+      #    schedule Sunday cron  → sunday
       - name: Resolve mode
         id: resolve
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "mode=${{ github.event.inputs.mode }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event.schedule }}" = "0 12 * * 1" ]; then
+          EVENT="${{ github.event_name }}"
+          INPUT="${{ github.event.inputs.mode }}"
+          SCHEDULE="${{ github.event.schedule }}"
+
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            if [ "$INPUT" = "auto" ]; then
+              # weekday: 0=Mon 1=Tue … 6=Sun (GNU date, UTC-4)
+              DOW=$(TZ="America/New_York" date +%u)
+              if [ "$DOW" = "7" ]; then
+                echo "mode=sunday" >> "$GITHUB_OUTPUT"
+              else
+                echo "mode=monday" >> "$GITHUB_OUTPUT"
+              fi
+            else
+              echo "mode=$INPUT" >> "$GITHUB_OUTPUT"
+            fi
+          elif [ "$SCHEDULE" = "0 13 * * 1" ]; then
             echo "mode=monday" >> "$GITHUB_OUTPUT"
           else
             echo "mode=sunday" >> "$GITHUB_OUTPUT"
           fi
 
-      # 5. Send the emails. Secrets injected as env vars; names match Vercel KV
-      #    conventions so the same variable names work in both environments.
-      - name: Send reminders
+      # 5. Send emails. Secrets injected as env vars.
+      - name: Send reminders (${{ steps.resolve.outputs.mode }})
         env:
-          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          SMTP_USERNAME:            ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD:            ${{ secrets.SMTP_PASSWORD }}
+          UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
         run: python chores_emailer.py ${{ steps.resolve.outputs.mode }}

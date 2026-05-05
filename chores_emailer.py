@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """
 chores_emailer.py
 =================
@@ -12,6 +13,9 @@ Environment variables (set in .env or as repo secrets):
   SMTP_PASSWORD   — Gmail App Password (16-char, no spaces)
   UPSTASH_REDIS_REST_URL    — Upstash Redis REST endpoint (optional)
   UPSTASH_REDIS_REST_TOKEN  — Upstash Redis REST token (optional)
+
+E402 is suppressed file-wide: load_dotenv() must run before lib.* imports so
+that env vars (Redis credentials, SMTP) are present when the modules initialise.
 """
 
 import os
@@ -35,13 +39,14 @@ from lib.db import get_task_status, seed_week
 
 # ── SMTP config ────────────────────────────────────────────────────────────────
 
-GMAIL_USER: str     = os.getenv("SMTP_USERNAME", "")
+GMAIL_USER: str = os.getenv("SMTP_USERNAME", "")
 GMAIL_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
 
 _TEMPLATE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def _load_template(filename: str, replacements: dict[str, str]) -> str:
     """Reads an HTML template and substitutes {{KEY}} placeholders."""
@@ -61,8 +66,8 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
         )
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = GMAIL_USER
-    msg["To"]      = to_email
+    msg["From"] = GMAIL_USER
+    msg["To"] = to_email
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
@@ -72,6 +77,7 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
 
 
 # ── Monday ────────────────────────────────────────────────────────────────────
+
 
 def send_monday_reminders() -> None:
     """
@@ -91,12 +97,15 @@ def send_monday_reminders() -> None:
         chore = main_chores[0]
         person_info = HOUSEMATES[name]
 
-        html = _load_template("email_monday.html", {
-            "NAME":       name,
-            "WEEK_NUM":   str(week_num),
-            "CHORE_ICON": CHORE_ICONS[chore],
-            "CHORE_NAME": chore,
-        })
+        html = _load_template(
+            "email_monday.html",
+            {
+                "NAME": name,
+                "WEEK_NUM": str(week_num),
+                "CHORE_ICON": CHORE_ICONS[chore],
+                "CHORE_NAME": chore,
+            },
+        )
         subject = f"Chores — Week {week_num}, you've got {chore}, {name}"
         _send_email(person_info["email"], subject, html)
 
@@ -106,6 +115,7 @@ def send_monday_reminders() -> None:
 
 
 # ── Sunday ────────────────────────────────────────────────────────────────────
+
 
 def send_sunday_reminders() -> None:
     """
@@ -132,12 +142,15 @@ def send_sunday_reminders() -> None:
         else:
             subject = f"Week {week_num} check-in — did {chore} happen, {name}?"
 
-        html = _load_template("email_sunday.html", {
-            "NAME":       name,
-            "WEEK_NUM":   str(week_num),
-            "CHORE_ICON": CHORE_ICONS[chore],
-            "CHORE_NAME": chore,
-        })
+        html = _load_template(
+            "email_sunday.html",
+            {
+                "NAME": name,
+                "WEEK_NUM": str(week_num),
+                "CHORE_ICON": CHORE_ICONS[chore],
+                "CHORE_NAME": chore,
+            },
+        )
         _send_email(person_info["email"], subject, html)
 
 
