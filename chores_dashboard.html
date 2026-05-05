@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>House Chores</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bone:      #F7F6F3;
+    --surface:   #FFFFFF;
+    --border:    #EAEAEA;
+    --border-md: rgba(0,0,0,0.08);
+    --text:      #111111;
+    --muted:     #787774;
+    --faint:     #ABABAB;
+    --serif:     "Instrument Serif", Georgia, serif;
+    --sans:      "Plus Jakarta Sans", "Helvetica Neue", Arial, sans-serif;
+    --spring:    cubic-bezier(0.16, 1, 0.3, 1);
+    --snap:      cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  body {
+    background: var(--bone);
+    font-family: var(--sans);
+    color: var(--text);
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #956400;
+    background: #FBF3DB;
+    border: 1px solid #EFE3B2;
+    padding: 3px 9px 3px 7px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  h1 em { font-style: italic; color: var(--muted); }
+
+  .header-meta { font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    padding: 6px 14px 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #346538;
+    flex-shrink: 0;
+  }
+
+  /* ── Nav tabs ────────────────────────────────────────────────────── */
+  .nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    position: sticky; top: 0; z-index: 40;
+    display: flex; gap: 0;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex-shrink: 0;
+    background: none; border: none;
+    border-bottom: 2px solid transparent;
+    padding: 14px 18px;
+    font-family: var(--sans);
+    font-size: 13px; font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 180ms var(--snap), border-color 180ms var(--snap);
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+  /* live dot after "This Week" tab */
+  .tab[data-tab="current"]::after {
+    content: "";
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #346538;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative; top: -1px;
+  }
+
+  .nav-sep { flex: 1; }
+
+  /* ── Main ────────────────────────────────────────────────────────── */
+  .main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 48px 80px;
+  }
+
+  /* ── Week header inside main ─────────────────────────────────────── */
+  .week-heading {
+    margin-bottom: 24px;
+  }
+
+  .week-heading-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .week-heading-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--text);
+  }
+
+  .week-heading-title em { font-style: italic; color: var(--muted); }
+
+  .week-date-range {
+    font-size: 13px;
+    color: var(--faint);
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Chore grid ──────────────────────────────────────────────────── */
+  /*
+   * 4 cards in a row at wide widths. Hallways is visually distinct
+   * but sits in the same grid — it gets a green tint via inline style.
+   */
+  .chore-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  /* ── Chore card ──────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 220ms var(--spring);
+  }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+
+  /* coloured top accent line */
+  .card-accent {
+    height: 3px;
+    border-radius: 2px;
+    margin-bottom: 2px;
+    flex-shrink: 0;
+  }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .card-chore {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  /* Assignee list */
+  .assignees { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+  .assignee {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .assignee-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Mark done button */
+  .mark-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--bone);
+    color: var(--muted);
+    transition: background 160ms var(--snap), color 160ms var(--snap),
+                border-color 160ms var(--snap), transform 160ms var(--snap);
+    align-self: flex-start;
+  }
+  .mark-btn:hover { background: #F0EDE8; color: var(--text); }
+  .mark-btn:active { transform: scale(0.97); }
+  .mark-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .mark-btn.done {
+    background: #EDF3EC;
+    color: #346538;
+    border-color: #C8DEC8;
+  }
+  .mark-btn.done:hover { background: #E2EEE1; }
+
+  .mark-btn.loading {
+    background: var(--bone);
+    color: var(--faint);
+    border-color: var(--border);
+  }
+
+  /* Hallways card: green-tinted */
+  .card.hallways {
+    background: #F7FCF7;
+    border-color: #D4E8D4;
+  }
+
+  /* ── Rotation reference table ────────────────────────────────────── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 14px;
+  }
+
+  .ref-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 48px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--bone);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 11px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 12px 16px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr.is-now td { background: #FDFCFA; }
+  tbody tr.is-now td:first-child { border-left: 2px solid var(--text); }
+
+  .now-pill {
+    display: inline-block;
+    background: var(--text);
+    color: var(--surface);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    margin-left: 7px;
+    vertical-align: middle;
+  }
+
+  .chore-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 5px;
+    border: 1px solid;
+    margin: 2px 2px 2px 0;
+  }
+
+  /* ── Skeleton ────────────────────────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+  }
+  .skel {
+    background: linear-gradient(90deg, #EDEAE4 25%, #E4E0D9 50%, #EDEAE4 75%);
+    background-size: 1200px 100%;
+    animation: shimmer 1.3s ease infinite;
+    border-radius: 10px;
+  }
+  .skel-card { height: 180px; border-radius: 12px; }
+
+  /* ── Error ───────────────────────────────────────────────────────── */
+  .err {
+    background: #FDEBEC;
+    border: 1px solid #F5C5C7;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #9F2F2D;
+    margin-bottom: 20px;
+  }
+
+  /* ── Footer ──────────────────────────────────────────────────────── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .footer span { font-size: 11px; color: var(--faint); letter-spacing: 0.04em; }
+
+  /* ── Animations ──────────────────────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade { animation: fadeUp 550ms var(--spring) both; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Responsive ──────────────────────────────────────────────────── */
+  @media (max-width: 860px) {
+    .chore-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .header { padding: 28px 20px 24px; }
+    .nav    { padding: 0 20px; }
+    .main   { padding: 28px 20px 60px; }
+    .chore-grid { grid-template-columns: 1fr; }
+    table   { font-size: 12px; }
+    thead th, tbody td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div>
+    <div class="header-eyebrow">
+      <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 6L8 1l7 5v8a1 1 0 01-1 1H2a1 1 0 01-1-1z"/>
+        <path d="M6 15V9h4v6"/>
+      </svg>
+      House Chores
+    </div>
+    <h1>Chores <em>Tracker</em></h1>
+    <p class="header-meta">5 people &middot; 4-week rotation &middot; resets every Monday</p>
+  </div>
+  <div class="live-badge">
+    <span class="live-dot"></span>
+    <span id="live-label">Loading&hellip;</span>
+  </div>
+</header>
+
+<!-- ── Nav ── -->
+<nav class="nav" role="tablist">
+  <button class="tab active" data-tab="current"  onclick="switchTab('current')" role="tab">This Week</button>
+  <button class="tab"        data-tab="1"         onclick="switchTab('1')"       role="tab">Week 1</button>
+  <button class="tab"        data-tab="2"         onclick="switchTab('2')"       role="tab">Week 2</button>
+  <button class="tab"        data-tab="3"         onclick="switchTab('3')"       role="tab">Week 3</button>
+  <button class="tab"        data-tab="4"         onclick="switchTab('4')"       role="tab">Week 4</button>
+  <span class="nav-sep" aria-hidden="true"></span>
+  <button class="tab"        data-tab="rotation"  onclick="switchTab('rotation')" role="tab">All weeks</button>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main" id="main" role="tabpanel" aria-live="polite"></main>
+
+<script>
+"use strict";
+
+// ── State ────────────────────────────────────────────────────────────────────
+
+/** @type {object|null} */
+let META = null;
+
+/** @type {string} */
+let activeTab = "current";
+
+/** @type {Map<number, object>} */
+const cache = new Map();
+
+// ── SVG icon fragments (all at 14×14, stroke-width 1.75) ─────────────────────
+
+const ICONS = {
+  check: `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3.5 3.5L13 5"/></svg>`,
+  circle: `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/></svg>`,
+  spin: `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="animation:spin 0.75s linear infinite"><path d="M8 2a6 6 0 110 12"/></svg>`,
+  bath: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17a2 2 0 002 2h14a2 2 0 002-2v-1H3v1z"/><path d="M3 16h18M3 11h18M7 11V5a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>`,
+  trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`,
+  kitchen: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a4 4 0 00-4 4v2h8V6a4 4 0 00-4-4z"/><rect x="4" y="8" width="16" height="13" rx="1"/><path d="M8 8v13M16 8v13"/></svg>`,
+  hallway: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l5-5"/><path d="M7.5 16L13 6c.5-.9 1.7-1.2 2.6-.7l1.2.7c.9.5 1.1 1.7.5 2.5L12 17l-1.5-1z"/></svg>`,
+};
+
+// Chore display names + icon key + colour palette
+const CHORE_DEF = {
+  Bathroom: { icon: "bath",    color: "#7c3aed", bg: "#F5F3FF", border: "#DDD6FE", textColor: "#5B21B6" },
+  Trash:    { icon: "trash",   color: "#ea580c", bg: "#FFF7ED", border: "#FED7AA", textColor: "#C2410C" },
+  Kitchen:  { icon: "kitchen", color: "#d97706", bg: "#FFFBEB", border: "#FDE68A", textColor: "#B45309" },
+  Hallways: { icon: "hallway", color: "#16a34a", bg: "#F0FDF4", border: "#BBF7D0", textColor: "#15803D" },
+};
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+
+(async function init() {
+  renderSkeletons();
+  try {
+    META = await api("/api/meta");
+  } catch {
+    showErr("Could not reach the API. Is the Flask server running?");
+    return;
+  }
+
+  document.getElementById("live-label").textContent =
+    `Rotation week ${META.current_week_num} of 4`;
+
+  // Label the "This Week" tab with the actual rotation slot
+  document.querySelector('[data-tab="current"]').textContent =
+    `This Week (W${META.current_week_num})`;
+
+  // Dot appended via CSS ::after — keep data-tab="current" on the button
+
+  // Mark the matching numbered tab too
+  document.querySelectorAll(".tab").forEach(btn => {
+    if (btn.dataset.tab === String(META.current_week_num)) {
+      btn.classList.add("is-current-num");
+    }
+  });
+
+  await switchTab("current");
+})();
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+
+/** @param {string} tab */
+async function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".tab").forEach(btn =>
+    btn.classList.toggle("active", btn.dataset.tab === tab)
+  );
+
+  if (tab === "rotation") { renderRotation(); return; }
+
+  const weekNum = tab === "current" ? META.current_week_num : parseInt(tab, 10);
+  const weekAbs = weekAbsFor(weekNum);
+
+  if (cache.has(weekAbs)) { renderWeek(cache.get(weekAbs)); return; }
+
+  renderSkeletons();
+  try {
+    const data = await api(`/api/schedule/${weekAbs}`);
+    cache.set(weekAbs, data);
+    renderWeek(data);
+  } catch {
+    showErr("Failed to load the schedule. Please refresh.");
+  }
+}
+
+/** Maps a rotation week number (1–4) to an absolute week index. */
+function weekAbsFor(weekNum) {
+  if (!META) return weekNum - 1;
+  return META.current_week_abs - (META.current_week_num - 1) + (weekNum - 1);
+}
+
+/** Formats a Monday date string for a given absolute week index. */
+function weekDateLabel(weekAbs) {
+  const start = new Date(META.start_date);
+  const monday = new Date(start.getTime() + weekAbs * 7 * 86400000);
+  const sunday = new Date(monday.getTime() + 6 * 86400000);
+  const fmt = d => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${fmt(monday)} – ${fmt(sunday)}`;
+}
+
+// ── Renderers ─────────────────────────────────────────────────────────────────
+
+function renderSkeletons() {
+  document.getElementById("main").innerHTML = `
+    <div class="chore-grid" style="margin-bottom:40px">
+      ${Array(4).fill(`<div class="skel skel-card"></div>`).join("")}
+    </div>
+    <div class="skel" style="height:180px;border-radius:12px"></div>`;
+}
+
+/**
+ * @param {object} data - /api/schedule response
+ */
+function renderWeek(data) {
+  const { week_num, week_abs, is_current, schedule, statuses } = data;
+  const dateRange = weekDateLabel(week_abs);
+
+  const headingSuffix = is_current ? ` <em>this week</em>` : "";
+  const heading = `Week ${week_num}${headingSuffix}`;
+
+  const cards = ["Bathroom", "Trash", "Kitchen", "Hallways"].map(chore =>
+    buildCard({ chore, schedule, statuses, week_abs })
+  ).join("");
+
+  document.getElementById("main").innerHTML = `
+    <div class="week-heading fade">
+      <div class="week-heading-row">
+        <div class="week-heading-title">${heading}</div>
+        <span class="week-date-range">${dateRange}</span>
+      </div>
+    </div>
+    <div class="chore-grid fade" style="animation-delay:50ms">${cards}</div>
+    ${buildRotationTable(week_num)}
+    <div class="footer fade" style="animation-delay:200ms">
+      <span>house chores &middot; resets every monday</span>
+      <span>statuses synced via Upstash Redis</span>
+    </div>`;
+}
+
+/**
+ * Builds one chore card.
+ * @param {{chore:string, schedule:object, statuses:object, week_abs:number}} p
+ */
+function buildCard({ chore, schedule, statuses, week_abs }) {
+  const def = CHORE_DEF[chore];
+  const isHallways = chore === "Hallways";
+
+  // Derive assignees from schedule
+  const assignees = Object.entries(schedule)
+    .filter(([, chores]) => chores.includes(chore))
+    .map(([name]) => name);
+
+  const allDone = assignees.length > 0 && assignees.every(name =>
+    (statuses[name] ?? {})[chore] === "done"
+  );
+
+  const assigneeHTML = assignees.map(name => {
+    const color = META.housemates[name]?.color ?? "#787774";
+    return `<div class="assignee">
+      <span class="assignee-dot" style="background:${color}"></span>
+      ${name}
+    </div>`;
+  }).join("");
+
+  const nextStatus = allDone ? "pending" : "done";
+  const assigneesAttr = JSON.stringify(assignees).replace(/"/g, "&quot;");
+  const btnClass = allDone ? "done" : "pending";
+  const btnLabel = allDone ? "Done" : "Mark done";
+  const btnIcon  = allDone ? ICONS.check : ICONS.circle;
+
+  return `
+    <div class="card${isHallways ? " hallways" : ""}">
+      <div class="card-accent" style="background:${def.color}"></div>
+      <div>
+        <div class="card-label">${chore}</div>
+        <div class="card-chore">${chore}</div>
+      </div>
+      <div class="assignees">${assigneeHTML}</div>
+      <button class="mark-btn ${btnClass}"
+        data-chore="${chore}"
+        data-week-abs="${week_abs}"
+        data-assignees="${assigneesAttr}"
+        data-next="${nextStatus}"
+        onclick="markTask(this)">
+        ${btnIcon} ${btnLabel}
+      </button>
+    </div>`;
+}
+
+/** Renders the full rotation reference table (all 4 weeks). */
+function renderRotation() {
+  document.getElementById("main").innerHTML = `
+    <p class="section-label fade">4-week rotation</p>
+    ${buildRotationTable(META.current_week_num, true)}
+    <div class="footer fade" style="animation-delay:160ms">
+      <span>house chores &middot; resets every monday</span>
+      <span>statuses synced via Upstash Redis</span>
+    </div>`;
+}
+
+/**
+ * Builds the rotation reference table HTML.
+ * @param {number} currentWeekNum - highlighted week (1–4)
+ * @param {boolean} [standalone=false] - if true, show section label
+ */
+function buildRotationTable(currentWeekNum, standalone = false) {
+  if (!META) return "";
+
+  const rows = META.rotation.map(({ week_num, schedule }) => {
+    const isCurrent = week_num === currentWeekNum;
+
+    const bath = findAssignee(schedule, "Bathroom");
+    const trash = findAssignees(schedule, "Trash");
+    const kitchen = findAssignee(schedule, "Kitchen");
+
+    const d = CHORE_DEF;
+    const chip = (chore, label) =>
+      `<span class="chore-chip" style="background:${d[chore].bg};color:${d[chore].textColor};border-color:${d[chore].border}">
+        ${ICONS[d[chore].icon]} ${label}
+      </span>`;
+
+    return `<tr class="${isCurrent ? "is-now" : ""}">
+      <td><strong>Week ${week_num}</strong>${isCurrent ? `<span class="now-pill">now</span>` : ""}</td>
+      <td>${chip("Bathroom", bath)}</td>
+      <td>${trash.map(n => chip("Trash", n)).join(" ")}</td>
+      <td>${chip("Kitchen", kitchen)}</td>
+      <td>${chip("Hallways", "Everyone")}</td>
+    </tr>`;
+  }).join("");
+
+  const label = standalone ? `<p class="section-label fade">4-week rotation</p>` : `<p class="section-label">Rotation reference</p>`;
+
+  return `
+    ${label}
+    <div class="ref-table-wrap fade" style="animation-delay:${standalone ? 60 : 80}ms">
+      <table>
+        <thead>
+          <tr>
+            <th>Week</th>
+            <th>Bathroom</th>
+            <th>Trash</th>
+            <th>Kitchen</th>
+            <th>Hallways</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ── Task marking ──────────────────────────────────────────────────────────────
+
+/** @param {HTMLButtonElement} btn */
+async function markTask(btn) {
+  const chore    = btn.dataset.chore;
+  const weekAbs  = parseInt(btn.dataset.weekAbs, 10);
+  const next     = btn.dataset.next;
+  const assignees = JSON.parse(btn.dataset.assignees.replace(/&quot;/g, '"'));
+
+  btn.disabled = true;
+  btn.className = "mark-btn loading";
+  btn.innerHTML = `${ICONS.spin} Saving`;
+
+  try {
+    await Promise.all(assignees.map(person =>
+      api("/api/mark", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ week_abs: weekAbs, person, chore, status: next }),
+      })
+    ));
+    cache.delete(weekAbs);
+    const fresh = await api(`/api/schedule/${weekAbs}`);
+    cache.set(weekAbs, fresh);
+    renderWeek(fresh);
+  } catch {
+    btn.disabled = false;
+    btn.className = "mark-btn pending";
+    btn.innerHTML = `${ICONS.circle} Retry`;
+    showErr(`Could not update ${chore}. Please try again.`);
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function findAssignee(schedule, chore) {
+  return Object.entries(schedule).find(([, c]) => c.includes(chore))?.[0] ?? "—";
+}
+
+function findAssignees(schedule, chore) {
+  return Object.entries(schedule).filter(([, c]) => c.includes(chore)).map(([n]) => n);
+}
+
+async function api(url, opts = {}) {
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+function showErr(msg) {
+  const el = document.getElementById("main");
+  const d = document.createElement("div");
+  d.className = "err";
+  d.textContent = msg;
+  el.prepend(d);
+  setTimeout(() => d.remove(), 5000);
+}
+</script>
+</body>
+</html>

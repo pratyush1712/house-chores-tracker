@@ -1,0 +1,69 @@
+name: Chore Reminders
+
+# ── Schedule (all times UTC) ───────────────────────────────────────────────────
+# Eastern time observes DST, so two offsets apply across the year:
+#   EDT (Mar – Nov, UTC-4):  9 AM EDT = 13:00 UTC  |  6 PM EDT = 22:00 UTC
+#   EST (Nov – Mar, UTC-5):  9 AM EST = 14:00 UTC  |  6 PM EST = 23:00 UTC
+#
+# Crons below target EDT (spring/summer rotation). Update to 13 / 23 in winter.
+# ──────────────────────────────────────────────────────────────────────────────
+on:
+  schedule:
+    - cron: "0 13 * * 1" # Monday   9:00 AM EDT
+    - cron: "0 22 * * 0" # Sunday   6:00 PM EDT
+
+  # Manual trigger for testing — choose which email to send.
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Email type to send"
+        required: true
+        default: "monday"
+        type: choice
+        options:
+          - monday
+          - sunday
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repo so the script and HTML templates are available.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Python.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Install runtime dependencies.
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Resolve which mode to run:
+      #    - workflow_dispatch → use the chosen input
+      #    - Monday cron       → monday
+      #    - Sunday cron       → sunday
+      - name: Resolve mode
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 12 * * 1" ]; then
+            echo "mode=monday" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=sunday" >> "$GITHUB_OUTPUT"
+          fi
+
+      # 5. Send the emails. Secrets injected as env vars; names match Vercel KV
+      #    conventions so the same variable names work in both environments.
+      - name: Send reminders
+        env:
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+        run: python chores_emailer.py ${{ steps.resolve.outputs.mode }}
