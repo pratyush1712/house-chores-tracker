@@ -9,8 +9,8 @@ name: Chore Reminders
 # ──────────────────────────────────────────────────────────────────────────────
 on:
   schedule:
-    - cron: "0 13 * * 1"   # Monday  9:00 AM EDT  → monday emails
-    - cron: "0 22 * * 0"   # Sunday  6:00 PM EDT  → sunday emails
+    - cron: "0 13 * * 1" # Monday  9:00 AM EDT  → monday emails
+    - cron: "0 22 * * 0" # Sunday  6:00 PM EDT  → sunday emails
 
   # Manual trigger — dispatch from the Actions tab or via the dashboard button.
   # "auto" detects today's weekday in EST and picks monday/sunday automatically.
@@ -76,10 +76,18 @@ jobs:
           fi
 
       # 5. Send emails. Secrets injected as env vars.
+      #    Optional: SMTP_HOST, SMTP_PORT (or SMTP_PORT_SSL + SMTP_PORT_TLS), SMTP_FROM_EMAIL
+      #    — add as repo secrets if not using default smtp.gmail.com + SMTP_PORT=465.
       - name: Send reminders (${{ steps.resolve.outputs.mode }})
         env:
-          SMTP_USERNAME:            ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD:            ${{ secrets.SMTP_PASSWORD }}
-          UPSTASH_REDIS_REST_URL:   ${{ secrets.UPSTASH_REDIS_REST_URL }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_PORT_SSL: ${{ secrets.SMTP_PORT_SSL }}
+          SMTP_PORT_TLS: ${{ secrets.SMTP_PORT_TLS }}
+          SMTP_USE_STARTTLS: ${{ secrets.SMTP_USE_STARTTLS }}
+          SMTP_FROM_EMAIL: ${{ secrets.SMTP_FROM_EMAIL }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
           UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
         run: python chores_emailer.py ${{ steps.resolve.outputs.mode }}

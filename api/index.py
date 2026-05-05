@@ -17,6 +17,7 @@ Routes:
   GET  /api/schedule               → Current week schedule + task statuses
   GET  /api/schedule/<week_abs>    → Specific week schedule + statuses
   POST /api/mark                   → Update a task status
+  GET  /api/stats                  → Lifetime completion stats for all housemates
   POST /api/send-reminders         → Trigger email send (monday | sunday | auto)
 """
 
@@ -48,7 +49,7 @@ from lib.chores import (
     get_week_number,
     get_week_schedule,
 )
-from lib.db import get_week_statuses, set_task_status
+from lib.db import get_all_stats, get_week_statuses, set_task_status
 from chores_emailer import send_monday_reminders, send_sunday_reminders
 
 # ── App factory ───────────────────────────────────────────────────────────────
@@ -171,6 +172,22 @@ def mark_task() -> ResponseReturnValue:
             "status": status,
         }
     )
+
+
+@app.route("/api/stats")
+def stats() -> ResponseReturnValue:
+    """
+    Returns lifetime completion stats for every housemate.
+
+    Response shape:
+      {
+        "Juan":     { done_on_time, done_late, skipped, streak, last_week_abs },
+        "Autumn":   { ... },
+        ...
+      }
+    """
+    all_stats = get_all_stats(list(HOUSEMATES.keys()))
+    return jsonify(all_stats)
 
 
 @app.route("/api/send-reminders", methods=["POST"])
