@@ -37,7 +37,7 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(_PROJECT_ROOT, ".env"))
 
-from flask import Flask, abort, jsonify, request, send_file
+from flask import Flask, abort, jsonify, request, send_file, send_from_directory
 from flask.typing import ResponseReturnValue
 
 from lib.chores import (
@@ -61,6 +61,22 @@ app = Flask(__name__, static_folder=None)
 _DASHBOARD_HTML = os.path.abspath(
     os.path.join(_PROJECT_ROOT, "static", "dashboard.html")
 )
+_ASSETS_DIR = os.path.abspath(os.path.join(_PROJECT_ROOT, "assets"))
+_MANIFEST_PATH = os.path.join(_ASSETS_DIR, "manifest.webmanifest")
+
+
+def _safe_asset_subpath(rel: str) -> str | None:
+    """Return a safe path relative to assets/, or None if invalid."""
+    normalized = rel.replace("\\", "/").strip("/")
+    if not normalized or ".." in normalized.split("/"):
+        return None
+    full = os.path.normpath(os.path.join(_ASSETS_DIR, normalized))
+    if not full.startswith(_ASSETS_DIR + os.sep):
+        return None
+    if not os.path.isfile(full):
+        return None
+    return normalized
+
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -69,6 +85,22 @@ _DASHBOARD_HTML = os.path.abspath(
 def dashboard() -> ResponseReturnValue:
     """Serves the static dashboard SPA."""
     return send_file(_DASHBOARD_HTML, mimetype="text/html")
+
+
+@app.route("/manifest.webmanifest")
+@app.route("/manifest.json")
+def web_manifest() -> ResponseReturnValue:
+    """PWA manifest (both .webmanifest and .json URLs)."""
+    return send_file(_MANIFEST_PATH, mimetype="application/manifest+json")
+
+
+@app.route("/assets/<path:relative_path>")
+def asset_file(relative_path: str) -> ResponseReturnValue:
+    """Static icons and images under assets/."""
+    safe = _safe_asset_subpath(relative_path)
+    if safe is None:
+        abort(404)
+    return send_from_directory(_ASSETS_DIR, safe)
 
 
 @app.route("/api/meta")

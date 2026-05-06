@@ -3,7 +3,95 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>House Chores</title>
+    <meta name="theme-color" content="#f0e9d6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="112 Ferris" />
+    <meta
+      name="description"
+      content="Chore rotation for 112 Ferris Place — assigned Tuesday, due Monday."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="112 Ferris Place · Chores" />
+    <meta
+      property="og:description"
+      content="Chore rotation for 112 Ferris Place — assigned Tuesday, due Monday."
+    />
+    <meta property="og:url" content="https://autumn-legacy.site/" />
+    <title>112 Ferris Place · Chores</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- ICO + SVG first; raster PNGs from /assets/Favicons/ -->
+    <link rel="icon" href="/assets/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/Favicons/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/Favicons/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href="/assets/Favicons/favicon-48x48.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="/assets/Favicons/favicon-96x96.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="144x144"
+      href="/assets/Favicons/favicon-144x144.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/assets/Favicons/favicon-192x192.png"
+    />
+    <!-- Apple home screen — /assets/AppIcon.appiconset/ -->
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="/assets/AppIcon.appiconset/Icon-76@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="167x167"
+      href="/assets/AppIcon.appiconset/Icon-83.5@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/AppIcon.appiconset/Icon-60@3x.png"
+    />
+    <!-- Windows pinned tile -->
+    <meta name="msapplication-TileColor" content="#f0e9d6" />
+    <meta
+      name="msapplication-TileImage"
+      content="/assets/Favicons/favicon-310x310.png"
+    />
+    <!--
+      Native launcher packs: assets/Android Image/*.png use density names (non-square);
+      not listed in manifest sizes. Use Favicons + AppIcon + web-app-manifest here.
+    -->
+    <!-- Social / link preview — high-res export from /assets/iOS Image/ -->
+    <meta
+      property="og:image"
+      content="https://autumn-legacy.site/assets/iOS%20Image/output-onlinepngtools@3x.png"
+    />
+    <meta property="og:image:width" content="788" />
+    <meta property="og:image:height" content="840" />
     <link
       href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -686,7 +774,7 @@
             <path d="M1 6L8 1l7 5v8a1 1 0 01-1 1H2a1 1 0 01-1-1z" />
             <path d="M6 15V9h4v6" />
           </svg>
-          House Chores
+          112 Ferris Place
         </div>
         <h1>Chores <em>Tracker</em></h1>
         <p class="header-meta">
@@ -711,7 +799,7 @@
           class="send-btn"
           id="send-btn"
           onclick="sendReminders()"
-          title="Send email reminders to all housemates for the current week"
+          title="Send email reminders to everyone at 112 Ferris Place for the current week"
         >
           <svg
             width="13"
@@ -906,7 +994,7 @@
     <div class="chore-grid fade" style="animation-delay:50ms">${cards}</div>
     ${buildRotationTable()}
     <div class="footer fade" style="animation-delay:200ms">
-      <span>house chores &middot; <strong>assigned:</strong> Tue &middot; <strong>due:</strong> Mon</span>
+      <span>112 Ferris Place &middot; <strong>assigned:</strong> Tue &middot; <strong>due:</strong> Mon</span>
       <span><strong>statuses</strong> synced via Upstash Redis</span>
       <p class="footer-credit">built by <a href="https://pratyushsudhakar.com" target="_blank" rel="noopener">Pratyush Sudhakar</a></p>
     </div>`;
@@ -977,7 +1065,7 @@
     <p class="section-label fade">Upcoming rotation</p>
     ${buildRotationTable()}
     <div class="footer fade" style="animation-delay:160ms">
-      <span>house chores &middot; <strong>assigned:</strong> Tue &middot; <strong>due:</strong> Mon</span>
+      <span>112 Ferris Place &middot; <strong>assigned:</strong> Tue &middot; <strong>due:</strong> Mon</span>
       <span><strong>statuses</strong> synced via Upstash Redis</span>
       <p class="footer-credit">built by <a href="https://pratyushsudhakar.com" target="_blank" rel="noopener">Pratyush Sudhakar</a></p>
     </div>`;
@@ -1099,7 +1187,10 @@
        * Shows a toast with the result and disables the button during the request.
        */
       async function sendReminders() {
-        if (!confirm("Send reminder emails to all housemates now?")) return;
+        if (
+          !confirm("Send reminder emails to everyone at 112 Ferris Place now?")
+        )
+          return;
 
         const btn = document.getElementById("send-btn");
         const originalHTML = btn.innerHTML;

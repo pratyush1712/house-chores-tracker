@@ -11,9 +11,10 @@
 
 ## Learned Workspace Facts
 
-- Stack: Python/Flask API served via `api/index.py`, hosted on Vercel; static dashboard at `static/dashboard.html`; GitHub Actions for scheduled email reminders.
+- Stack: Python/Flask API served via `api/index.py`, hosted on Vercel; static dashboard at `static/dashboard.html` with production URL https://autumn-legacy.site; GitHub Actions for scheduled email reminders.
 - Database: Upstash Redis via `upstash-redis` library using `Redis.from_env()`, which requires `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`; Vercel KV vars (`KV_REST_API_URL` etc.) must be aliased to those names in Vercel env settings.
-- Email: `lib/emailer.py` sends HTML emails (`templates/email_monday.html`, `templates/email_sunday.html`); SMTP is configurable via `SMTP_HOST`, `SMTP_PORT`/`SMTP_PORT_SSL`/`SMTP_PORT_TLS`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL`; Namecheap Private Email host is `mail.privateemail.com`.
+- Email: `lib/emailer.py` sends multipart/alternative emails (plain text + HTML); `From` uses `formataddr(("House Chores Tracker", address))`. Some strict gateways (e.g. Cornell’s Jellyfish) reject HTML-only messages, so plain text must be included. Templates `templates/email_tuesday.html` (assignment, sent Tuesdays) and `templates/email_monday.html` (check-in, sent Mondays); `send_reminders(mode)` and `python -m lib.emailer` accept `mode` `tuesday` or `monday`. Primary SMTP via `SMTP_HOST`, `SMTP_PORT`/`SMTP_PORT_SSL`/`SMTP_PORT_TLS`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM_EMAIL` (Private Email host `mail.privateemail.com`); optional fallback after primary failure using `SMTP_FALLBACK_USERNAME`, `SMTP_FALLBACK_PASSWORD`, `SMTP_FALLBACK_FROM_EMAIL`.
+- `HOUSEMATES` in `lib/chores.py` may include optional `email2`; each reminder is sent to primary and secondary addresses when `email2` is set.
 - Chore rotation: each chore (`Bathroom`, `Kitchen`, `Trash`, `Hallways`) has its own independent pool of assignees with different lengths; pools rotate independently using `week_abs % len(pool)` - no global N-week cycle.
 - Niranjan is the fixed primary on Trash every week; the partner rotates from a separate pool; Niranjan does Trash on Monday specifically.
 - `PersonStats` tracked per person in Redis (`stats:{person}` hash): `done_on_time`, `done_late`, `skipped`, `streak`, `last_week_abs`.

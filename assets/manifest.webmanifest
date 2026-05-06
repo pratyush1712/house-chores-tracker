@@ -1,0 +1,68 @@
+{
+  "id": "/",
+  "name": "112 Ferris Place · Chores",
+  "short_name": "112 Ferris",
+  "description": "Chore rotation for 112 Ferris Place — assignments Tuesday, due Monday.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#f0e9d6",
+  "background_color": "#f0e9d6",
+  "icons": [
+    {
+      "src": "/assets/Favicons/favicon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/Favicons/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/Favicons/favicon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/Favicons/favicon-310x310.png",
+      "sizes": "310x310",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/AppIcon.appiconset/iTunesArtwork-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

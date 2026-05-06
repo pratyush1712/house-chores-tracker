@@ -81,10 +81,8 @@ jobs:
       - name: Send reminders (${{ steps.resolve.outputs.mode }})
         env:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_PORT_SSL: ${{ secrets.SMTP_PORT_SSL }}
           SMTP_PORT_TLS: ${{ secrets.SMTP_PORT_TLS }}
-          SMTP_USE_STARTTLS: ${{ secrets.SMTP_USE_STARTTLS }}
           SMTP_FROM_EMAIL: ${{ secrets.SMTP_FROM_EMAIL }}
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
