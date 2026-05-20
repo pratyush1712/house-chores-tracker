@@ -52,7 +52,7 @@ from lib.chores import (
     get_week_schedule,
 )
 from lib.db import get_all_stats, get_week_statuses, set_task_status
-from lib.emailer import send_reminders
+from lib.emailer import send_reminders, send_reminders_to_recipients
 
 # ── App factory ───────────────────────────────────────────────────────────────
 
@@ -229,7 +229,10 @@ def send_reminders_route() -> ResponseReturnValue:
     Triggers an email batch for the current week.
 
     Optional JSON body:
-      { "mode": "tuesday" | "monday" | "auto" }
+      {
+        "mode": "tuesday" | "monday" | "auto",
+        "recipients": ["Name1", "Name2"] (optional - if provided, sends only to these people)
+      }
 
     "auto" (default) inspects the current day in EST:
       - Tuesday  → sends tuesday assignment emails
@@ -242,6 +245,7 @@ def send_reminders_route() -> ResponseReturnValue:
 
     body: dict[str, object] = request.get_json(force=True, silent=True) or {}
     requested_mode: object = body.get("mode", "auto")
+    recipients: object = body.get("recipients")
 
     if not isinstance(requested_mode, str) or requested_mode not in (
         "tuesday",
@@ -258,7 +262,17 @@ def send_reminders_route() -> ResponseReturnValue:
         resolved_mode = requested_mode
 
     try:
-        send_reminders(resolved_mode)
+        # Check if specific recipients are requested
+        if recipients is not None:
+            if not isinstance(recipients, list) or not all(
+                isinstance(r, str) for r in recipients
+            ):
+                abort(400, description="recipients must be a list of strings")
+            if not recipients:
+                abort(400, description="recipients list cannot be empty")
+            send_reminders_to_recipients(resolved_mode, recipients)  # type: ignore[arg-type]
+        else:
+            send_reminders(resolved_mode)
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
 

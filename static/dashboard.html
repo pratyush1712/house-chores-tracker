@@ -697,6 +697,245 @@
         }
       }
 
+      /* ── Modal dialog ────────────────────────────────────────────────── */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 300;
+        animation: fadeIn 200ms var(--snap);
+      }
+      .modal-overlay.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .modal {
+        background: var(--surface);
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: calc(100vw - 40px);
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 300ms var(--snap);
+        font-family: var(--sans);
+      }
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-header h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.01em;
+      }
+      .modal-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        color: var(--muted);
+        border-radius: 6px;
+        transition: background 160ms var(--snap), color 160ms var(--snap);
+      }
+      .modal-close:hover {
+        background: var(--bg);
+        color: var(--text);
+      }
+      .modal-body {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+      }
+      .modal-section {
+        margin-bottom: 24px;
+      }
+      .modal-section:last-child {
+        margin-bottom: 0;
+      }
+      .modal-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 10px;
+      }
+      .email-mode-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .mode-tab {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 160ms var(--snap);
+        text-align: center;
+        white-space: nowrap;
+      }
+      .mode-tab:hover {
+        border-color: var(--text);
+        color: var(--text);
+      }
+      .mode-tab.active {
+        background: var(--text);
+        color: var(--surface);
+        border-color: var(--text);
+      }
+      .mode-description {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0;
+        padding: 0 0 8px 0;
+      }
+      .recipient-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .toggle-all-btn {
+        padding: 4px 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 160ms var(--snap);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .toggle-all-btn:hover {
+        border-color: var(--text);
+        color: var(--text);
+      }
+      .recipients-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .recipient-checkbox {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+        cursor: pointer;
+        transition: all 160ms var(--snap);
+      }
+      .recipient-checkbox:hover {
+        background: color-mix(in srgb, var(--bg) 80%, var(--text));
+        border-color: var(--text);
+      }
+      .recipient-checkbox input[type="checkbox"] {
+        margin: 0;
+        margin-right: 10px;
+        cursor: pointer;
+        accent-color: var(--text);
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+      }
+      .recipient-label {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        font-size: 14px;
+        color: var(--text);
+        cursor: pointer;
+        gap: 8px;
+      }
+      .recipient-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+      .modal-footer {
+        display: flex;
+        gap: 12px;
+        padding: 20px 24px;
+        border-top: 1px solid var(--border);
+      }
+      .modal-btn {
+        flex: 1;
+        padding: 11px 16px;
+        border-radius: 8px;
+        border: none;
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition: all 160ms var(--snap);
+      }
+      .modal-btn-secondary {
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .modal-btn-secondary:hover {
+        background: color-mix(in srgb, var(--bg) 80%, var(--text));
+        border-color: var(--text);
+      }
+      .modal-btn-primary {
+        background: var(--text);
+        color: var(--surface);
+        border: 1px solid var(--text);
+      }
+      .modal-btn-primary:hover {
+        background: #1a0c02;
+      }
+      .modal-btn-primary:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
       /* ── Responsive ──────────────────────────────────────────────────── */
 
       /* 4-col → 2-col at 768px (tablet portrait) */
@@ -753,6 +992,38 @@
           padding: 2px 6px;
         }
       }
+
+      /* Mobile modal responsive */
+      @media (max-width: 640px) {
+        .modal {
+          width: calc(100vw - 24px);
+          border-radius: 16px;
+        }
+        .modal-header {
+          padding: 20px;
+        }
+        .modal-header h2 {
+          font-size: 16px;
+        }
+        .modal-body {
+          padding: 20px;
+        }
+        .modal-footer {
+          padding: 16px 20px;
+          flex-direction: column-reverse;
+        }
+        .modal-btn {
+          width: 100%;
+        }
+        .email-mode-tabs {
+          flex-direction: column;
+          gap: 6px;
+        }
+        .mode-tab {
+          padding: 12px;
+          font-size: 13px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -798,8 +1069,8 @@
         <button
           class="send-btn"
           id="send-btn"
-          onclick="sendReminders()"
-          title="Send email reminders to everyone at 112 Ferris Place for the current week"
+          onclick="openEmailModal()"
+          title="Send email reminders to housemates for the current week"
         >
           <svg
             width="13"
@@ -821,6 +1092,45 @@
 
     <!-- Toast notification -->
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Send email modal -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeEmailModal(event)">
+      <div class="modal" id="email-modal">
+        <div class="modal-header">
+          <h2>Send Email Reminders</h2>
+          <button class="modal-close" onclick="closeEmailModal()" aria-label="Close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M12 4L4 12M4 4l8 8"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-section">
+            <label class="modal-label">Email Mode</label>
+            <div class="email-mode-tabs">
+              <button class="mode-tab active" data-mode="auto" onclick="selectEmailMode('auto')">Auto Detect</button>
+              <button class="mode-tab" data-mode="tuesday" onclick="selectEmailMode('tuesday')">Tuesday Kick-off</button>
+              <button class="mode-tab" data-mode="monday" onclick="selectEmailMode('monday')">Monday Check-in</button>
+            </div>
+            <p class="mode-description" id="mode-description">Based on current day: Tuesday sends kick-off emails, Monday sends check-in emails</p>
+          </div>
+
+          <div class="modal-section">
+            <div class="recipient-header">
+              <label class="modal-label">Recipients</label>
+              <button class="toggle-all-btn" onclick="toggleAllRecipients()">Select All</button>
+            </div>
+            <div class="recipients-grid" id="recipients-grid">
+              <!-- Populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn modal-btn-secondary" onclick="closeEmailModal()">Cancel</button>
+          <button class="modal-btn modal-btn-primary" id="send-modal-btn" onclick="sendSelectiveReminders()">Send Emails</button>
+        </div>
+      </div>
+    </div>
 
     <!-- ── Nav ── -->
     <nav class="nav" role="tablist">
@@ -1179,39 +1489,117 @@
         setTimeout(() => d.remove(), 5000);
       }
 
-      // ── Send reminders ────────────────────────────────────────────────────────────
+      // ── Send reminders (modal-based) ──────────────────────────────────────────
 
-      /**
-       * Calls POST /api/send-reminders with mode "auto", which the server resolves
-       * to "monday" or "sunday" based on the current day in EST.
-       * Shows a toast with the result and disables the button during the request.
-       */
-      async function sendReminders() {
-        if (
-          !confirm("Send reminder emails to everyone at 112 Ferris Place now?")
-        )
+      let selectedEmailMode = "auto";
+      let selectedRecipients = new Set();
+
+      function openEmailModal() {
+        const modal = document.getElementById("email-modal");
+        const overlay = document.getElementById("modal-overlay");
+
+        // Reset state
+        selectedEmailMode = "auto";
+        selectedRecipients.clear();
+
+        // Populate recipients list
+        if (META && META.housemates) {
+          const grid = document.getElementById("recipients-grid");
+          grid.innerHTML = Object.entries(META.housemates)
+            .map(([name, info]) => {
+              const color = info.color || "#787774";
+              return `
+            <label class="recipient-checkbox">
+              <input type="checkbox" value="${esc(name)}" onchange="updateSelectedRecipients()">
+              <span class="recipient-label">
+                <span class="recipient-color" style="background:${esc(color)}"></span>
+                ${esc(name)}
+              </span>
+            </label>`;
+            })
+            .join("");
+        }
+
+        overlay.classList.add("show");
+      }
+
+      function closeEmailModal(event) {
+        if (event && event.target !== document.getElementById("modal-overlay")) return;
+        const overlay = document.getElementById("modal-overlay");
+        overlay.classList.remove("show");
+      }
+
+      function selectEmailMode(mode) {
+        selectedEmailMode = mode;
+        document.querySelectorAll(".mode-tab").forEach(btn => {
+          btn.classList.remove("active");
+        });
+        document.querySelector(`[data-mode="${mode}"]`).classList.add("active");
+
+        const desc = document.getElementById("mode-description");
+        if (mode === "auto") {
+          desc.textContent = "Based on current day: Tuesday sends kick-off emails, Monday sends check-in emails";
+        } else if (mode === "tuesday") {
+          desc.textContent = "Send week assignment emails to selected recipients";
+        } else {
+          desc.textContent = "Send week check-in emails to selected recipients";
+        }
+      }
+
+      function updateSelectedRecipients() {
+        const checkboxes = document.querySelectorAll(".recipients-grid input[type='checkbox']");
+        selectedRecipients.clear();
+        checkboxes.forEach(cb => {
+          if (cb.checked) {
+            selectedRecipients.add(cb.value);
+          }
+        });
+      }
+
+      function toggleAllRecipients() {
+        const checkboxes = document.querySelectorAll(".recipients-grid input[type='checkbox']");
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+        checkboxes.forEach(cb => {
+          cb.checked = !allChecked;
+        });
+        updateSelectedRecipients();
+      }
+
+      async function sendSelectiveReminders() {
+        if (selectedRecipients.size === 0) {
+          showToast("Please select at least one recipient", true);
           return;
+        }
 
-        const btn = document.getElementById("send-btn");
-        const originalHTML = btn.innerHTML;
+        const btn = document.getElementById("send-modal-btn");
+        const originalText = btn.textContent;
 
         btn.disabled = true;
         btn.innerHTML = `${ICONS.spin} Sending&hellip;`;
 
         try {
+          const recipients = Array.from(selectedRecipients);
           const res = await api("/api/send-reminders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mode: "auto" }),
+            body: JSON.stringify({
+              mode: selectedEmailMode,
+              recipients: recipients.length === Object.keys(META.housemates).length ? undefined : recipients
+            }),
           });
-          const label =
-            res.mode === "sunday" ? "Sunday check-in" : "Monday kick-off";
-          showToast(`${label} emails sent.`);
+
+          const label = res.mode === "tuesday" ? "Tuesday assignment" : "Monday check-in";
+          const count = recipients.length === Object.keys(META.housemates).length
+            ? "all housemates"
+            : `${recipients.length} ${recipients.length === 1 ? "person" : "people"}`;
+          showToast(`${label} emails sent to ${count}`);
+          closeEmailModal();
         } catch (err) {
           showToast("Failed to send emails. Check server logs.", true);
         } finally {
           btn.disabled = false;
-          btn.innerHTML = originalHTML;
+          btn.textContent = originalText;
         }
       }
 

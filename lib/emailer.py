@@ -282,6 +282,95 @@ def send_reminders(mode: str) -> None:
         print(f"  Database seeded for week {week_abs}.")
 
 
+def send_reminders_to_recipients(mode: str, recipient_names: list[str]) -> None:
+    """
+    Send chore reminder emails to specific housemates.
+
+    mode="tuesday" - kick-off email (email_tuesday.html); also seeds the DB.
+    mode="monday"  - check-in email (email_monday.html); subject personalised
+                     by current completion status.
+    recipient_names - list of housemate names to send emails to.
+    """
+    if mode not in ("tuesday", "monday"):
+        raise ValueError(f"mode must be 'tuesday' or 'monday', got {mode!r}")
+
+    if not recipient_names:
+        raise ValueError("At least one recipient must be specified")
+
+    week_abs = get_week_number()
+    week_num = get_rotation_week(week_abs)
+    schedule = get_week_schedule(week_abs)
+    template = f"email_{mode}.html"
+
+    valid_names = set(HOUSEMATES.keys())
+    invalid_names = set(recipient_names) - valid_names
+    if invalid_names:
+        raise ValueError(f"Unknown recipients: {', '.join(invalid_names)}")
+
+    print(f"\nSending {mode} reminders to specific recipients - Week {week_num} (abs {week_abs})...")
+
+    for name in recipient_names:
+        chores = schedule.get(name, [])
+        main_chores = [c for c in chores if not CHORE_META[c].get("shared")]
+        if not main_chores:
+            print(f"  Skipping {name} - no primary chore assigned this week.")
+            continue
+
+        chore = main_chores[0]
+        person_info = HOUSEMATES[name]
+
+        if mode == "tuesday":
+            subject = f"Chores - Week {week_num}, you've got {chore}, {name}"
+        else:
+            status = get_task_status(week_abs, name, chore)
+            if status == "done":
+                subject = f"Week {week_num} wrap-up - nice work, {name}!"
+            else:
+                subject = f"Week {week_num} check-in - did {chore} happen, {name}?"
+
+        html = _load_template(
+            template,
+            {
+                "NAME": name,
+                "WEEK_NUM": str(week_num),
+                "CHORE_ICON": CHORE_ICONS[chore],
+                "CHORE_NAME": chore,
+            },
+        )
+
+        if mode == "tuesday":
+            text = (
+                f"Hi {name},\n\n"
+                f"Your chore for Week {week_num}: {chore}\n"
+                f"Complete it any day before Monday.\n\n"
+                f"Shared chore (everyone): Hallways - quick sweep, every week.\n\n"
+                f"No strict deadline, just get it done before the week is out.\n"
+                f"If you need to swap, let the house know.\n\n"
+                f"Track it here: https://autumn-legacy.site\n\n"
+                f"-- House Chores Tracker"
+            )
+        else:
+            text = (
+                f"Hi {name},\n\n"
+                f"Week {week_num} check-in - did {chore} get done?\n\n"
+                f"Your chore: {chore}\n"
+                f"Shared chore (everyone): Hallways\n\n"
+                f"Update your status: https://autumn-legacy.site\n\n"
+                f"If something came up, just let the house know. No drama.\n"
+                f"New rotation starts Tuesday.\n\n"
+                f"-- House Chores Tracker"
+            )
+
+        recipients = [str(person_info["email"])]
+        if "email2" in person_info:
+            recipients.append(str(person_info["email2"]))
+        _send_email(recipients, subject, html, text)
+
+    if mode == "tuesday":
+        seed_week(week_abs, schedule)
+        print(f"  Database seeded for week {week_abs}.")
+
+
 if __name__ == "__main__":
     mode = sys.argv[1].lower() if len(sys.argv) > 1 else ""
     if mode in ("tuesday", "monday"):
