@@ -127,7 +127,9 @@ POOLS: dict[str, list[list[str]]] = {
 
 
 def get_week_number(today: date | None = None) -> int:
-    return max(0, ((today or date.today()) - HOUSE_START_DATE).days // 7)
+    current = today or date.today()
+    days_since_anchor = (current - HOUSE_START_DATE).days
+    return max(0, (days_since_anchor - 1) // 7)
 
 
 def get_assignees(chore: str, week_abs: int) -> list[str]:

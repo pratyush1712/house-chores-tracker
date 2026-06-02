@@ -253,7 +253,7 @@ def send_reminders(mode: str) -> None:
             text = (
                 f"Hi {name},\n\n"
                 f"Your chore for Week {week_num}: {chore}\n"
-                f"Complete it any day before Monday.\n\n"
+                f"Complete it by Monday.\n\n"
                 f"Shared chore (everyone): Hallways - quick sweep, every week.\n\n"
                 f"No strict deadline, just get it done before the week is out.\n"
                 f"If you need to swap, let the house know.\n\n"
@@ -307,7 +307,9 @@ def send_reminders_to_recipients(mode: str, recipient_names: list[str]) -> None:
     if invalid_names:
         raise ValueError(f"Unknown recipients: {', '.join(invalid_names)}")
 
-    print(f"\nSending {mode} reminders to specific recipients - Week {week_num} (abs {week_abs})...")
+    print(
+        f"\nSending {mode} reminders to specific recipients - Week {week_num} (abs {week_abs})..."
+    )
 
     for name in recipient_names:
         chores = schedule.get(name, [])
@@ -342,7 +344,7 @@ def send_reminders_to_recipients(mode: str, recipient_names: list[str]) -> None:
             text = (
                 f"Hi {name},\n\n"
                 f"Your chore for Week {week_num}: {chore}\n"
-                f"Complete it any day before Monday.\n\n"
+                f"Complete it by Monday.\n\n"
                 f"Shared chore (everyone): Hallways - quick sweep, every week.\n\n"
                 f"No strict deadline, just get it done before the week is out.\n"
                 f"If you need to swap, let the house know.\n\n"

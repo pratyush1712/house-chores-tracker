@@ -24,7 +24,7 @@ TaskStatus = Literal["pending", "done", "skipped"]
 
 
 class PersonStats(TypedDict):
-    done_on_time: int  # marked done before Sunday 18:00 EST
+    done_on_time: int  # marked done before Monday 23:59 Eastern
     done_late: int
     skipped: int
     streak: int  # consecutive weeks with at least one done task
@@ -63,17 +63,13 @@ def _stats_key(person: str) -> str:
 
 
 def _is_on_time(week_abs: int, marked_at: datetime, start_date: "date") -> bool:
-    """Sunday 18:00 America/New_York is the weekly completion deadline."""
-    from datetime import timedelta
+    """Monday 23:59 America/New_York is the weekly completion deadline."""
+    from datetime import time, timedelta
 
-    week_sunday = start_date + timedelta(weeks=week_abs, days=6)
-    deadline = datetime(
-        week_sunday.year,
-        week_sunday.month,
-        week_sunday.day,
-        18,
-        0,
-        0,
+    due_date = start_date + timedelta(weeks=week_abs, days=7)
+    deadline = datetime.combine(
+        due_date,
+        time(23, 59, 59),
         tzinfo=ZoneInfo("America/New_York"),
     )
     return marked_at <= deadline
