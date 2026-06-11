@@ -52,7 +52,7 @@ from lib.chores import (
     get_week_schedule,
 )
 from lib.db import get_all_stats, get_week_statuses, set_task_status
-from lib.emailer import send_reminders
+from lib.emailer import render_reminder_emails, send_reminders
 
 # ── App factory ───────────────────────────────────────────────────────────────
 
@@ -229,7 +229,7 @@ def send_reminders_route() -> ResponseReturnValue:
     Triggers an email batch for the current week.
 
     Optional JSON body:
-      { "mode": "tuesday" | "monday" | "auto" }
+      { "mode": "tuesday" | "monday" | "auto", "preview": bool }
 
     "auto" (default) inspects the current day in EST:
       - Tuesday  → sends tuesday assignment emails
@@ -257,7 +257,22 @@ def send_reminders_route() -> ResponseReturnValue:
     else:
         resolved_mode = requested_mode
 
+    preview = body.get("preview", False)
+    if not isinstance(preview, bool):
+        abort(400, description="preview must be a boolean when provided")
+
     try:
+        if preview:
+            rendered = render_reminder_emails(resolved_mode)
+            return jsonify(
+                {
+                    "ok": True,
+                    "preview": True,
+                    "mode": resolved_mode,
+                    "count": len(rendered),
+                    "emails": rendered,
+                }
+            )
         send_reminders(resolved_mode)
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -265,6 +280,7 @@ def send_reminders_route() -> ResponseReturnValue:
     return jsonify(
         {
             "ok": True,
+            "preview": False,
             "mode": resolved_mode,
             "detail": f"{'Tuesday assignment' if resolved_mode == 'tuesday' else 'Monday check-in'} emails sent.",
         }

@@ -1,519 +1,60 @@
-<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MONDAY CHECK-IN - WK-{{WEEK_NUM}}</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      *,
-      *::before,
-      *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        background-color: #e8e8e4;
-        font-family: "IBM Plex Mono", "Courier New", monospace;
-        color: #0a0a0a;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      .email-bg {
-        padding: 40px 20px 64px;
-        min-height: 100dvh;
-      }
-
-      /* Grid container - gap: 1px against dark bg creates razor dividers */
-      .container {
-        max-width: 560px;
-        margin: 0 auto;
-        background: #0a0a0a;
-        display: grid;
-        gap: 1px;
-      }
-
-      /* ── Top metadata bar ── */
-      .meta-bar {
-        background: #f4f4f0;
-        padding: 10px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-
-      .meta-tag {
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #0a0a0a;
-      }
-
-      .meta-coords {
-        font-size: 10px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #525050;
-        white-space: nowrap;
-      }
-
-      /* ── Aviation red stripe ── */
-      .accent-stripe {
-        background: #e61919;
-        height: 4px;
-      }
-
-      /* ── Header ── */
-      .header {
-        background: #f4f4f0;
-        padding: 32px 24px 28px;
-      }
-
-      .inspection-label {
-        font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #525050;
-        margin-bottom: 10px;
-      }
-
-      .header-name {
-        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
-        font-size: clamp(3rem, 10vw, 5.5rem);
-        font-weight: 900;
-        line-height: 0.9;
-        letter-spacing: -0.04em;
-        text-transform: uppercase;
-        color: #0a0a0a;
-        word-break: break-word;
-      }
-
-      .header-question {
-        font-size: 12px;
-        font-weight: 500;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #525050;
-        margin-top: 14px;
-        line-height: 1.6;
-      }
-
-      /* ── Section heading row ── */
-      .section-row {
-        background: #eaeae6;
-        padding: 9px 24px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .section-row-label {
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: #525050;
-      }
-
-      .section-row-line {
-        flex: 1;
-        height: 1px;
-        background: #c8c8c4;
-      }
-
-      .section-row-id {
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #e61919;
-      }
-
-      /* ── Inspection status grid ── */
-      .status-grid {
-        background: #0a0a0a;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1px;
-      }
-
-      .status-cell {
-        padding: 20px 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .status-cell-complete {
-        background: #f4f4f0;
-      }
-
-      .status-cell-pending {
-        background: #eaeae6;
-      }
-
-      .status-indicator {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .status-dot-complete {
-        width: 10px;
-        height: 10px;
-        background: #0a0a0a;
-        flex-shrink: 0;
-      }
-
-      .status-dot-pending {
-        width: 10px;
-        height: 10px;
-        border: 2px solid #787474;
-        flex-shrink: 0;
-      }
-
-      .status-indicator-label {
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #525050;
-      }
-
-      .status-cell-title {
-        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
-        font-size: 18px;
-        font-weight: 900;
-        letter-spacing: -0.02em;
-        text-transform: uppercase;
-        line-height: 1;
-      }
-
-      .status-cell-complete .status-cell-title {
-        color: #0a0a0a;
-      }
-
-      .status-cell-pending .status-cell-title {
-        color: #1a1a1a;
-      }
-
-      .status-cell-desc {
-        font-size: 11px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        line-height: 1.6;
-        color: #525050;
-      }
-
-      /* ── Assignment summary rows ── */
-      .assignment-row {
-        background: #f4f4f0;
-        padding: 16px 24px;
-        display: grid;
-        grid-template-columns: 36px 1fr auto;
-        gap: 0 14px;
-        align-items: center;
-      }
-
-      .assignment-row + .assignment-row {
-        background: #eaeae6;
-      }
-
-      .unit-badge {
-        background: #0a0a0a;
-        color: #f4f4f0;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        text-align: center;
-        padding: 5px 4px;
-        line-height: 1.2;
-        align-self: start;
-      }
-
-      .unit-badge-outline {
-        border: 1.5px solid #0a0a0a;
-        color: #0a0a0a;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        text-align: center;
-        padding: 4px 4px;
-        line-height: 1.2;
-        align-self: start;
-      }
-
-      .assignment-name {
-        font-family: "Archivo Black", "Arial Black", Impact, sans-serif;
-        font-size: 16px;
-        font-weight: 900;
-        letter-spacing: -0.01em;
-        text-transform: uppercase;
-        color: #0a0a0a;
-        line-height: 1;
-        margin-bottom: 4px;
-      }
-
-      .assignment-sub {
-        font-size: 10px;
-        letter-spacing: 0.07em;
-        text-transform: uppercase;
-        color: #525050;
-      }
-
-      .assignment-class {
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #525050;
-        border: 1px solid #b8b8b4;
-        padding: 3px 8px;
-        white-space: nowrap;
-        align-self: center;
-      }
-
-      /* ── Directive note ── */
-      .directive {
-        background: #f4f4f0;
-        padding: 16px 24px;
-        border-top: 2px solid #0a0a0a;
-        border-bottom: 2px solid #0a0a0a;
-      }
-
-      .directive p {
-        font-size: 11px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: #525050;
-        line-height: 1.8;
-      }
-
-      .directive p strong {
-        color: #0a0a0a;
-        font-weight: 600;
-      }
-
-      /* ── CTA buttons ── */
-      .cta-block {
-        background: #f4f4f0;
-        padding: 20px 24px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1px;
-        background: #0a0a0a;
-      }
-
-      .cta-primary {
-        display: block;
-        text-align: center;
-        background: #0a0a0a;
-        color: #f4f4f0;
-        text-decoration: none;
-        font-family: "IBM Plex Mono", "Courier New", monospace;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        padding: 16px 14px;
-      }
-
-      .cta-primary:hover {
-        background: #e61919;
-      }
-
-      .cta-secondary {
-        display: block;
-        text-align: center;
-        background: #eaeae6;
-        color: #1a1a1a;
-        text-decoration: none;
-        font-family: "IBM Plex Mono", "Courier New", monospace;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        padding: 16px 14px;
-      }
-
-      .cta-secondary:hover {
-        background: #d8d8d4;
-      }
-
-      /* ── Footer ── */
-      .footer {
-        background: #0a0a0a;
-        padding: 13px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-
-      .footer-text {
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #909090;
-      }
-
-      .footer-rev {
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #e61919;
-        white-space: nowrap;
-      }
-
-      @media (max-width: 600px) {
-        .email-bg {
-          padding: 20px 12px 48px;
-        }
-
-        .status-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .cta-block {
-          grid-template-columns: 1fr;
-        }
-
-        .assignment-row {
-          grid-template-columns: 36px 1fr;
-        }
-
-        .assignment-class {
-          display: none;
-        }
-      }
-    </style>
+    <title>Week {{WEEK_NUM}} chore check-in</title>
   </head>
-  <body>
-    <div class="email-bg">
-      <div class="container">
-        <!-- Meta bar -->
-        <div class="meta-bar">
-          <span class="meta-tag">[ FINAL INSPECTION ]</span>
-          <span class="meta-coords"
-            >WK-{{WEEK_NUM}} &middot; MONDAY WRAP-UP</span
-          >
-        </div>
-
-        <!-- Red accent stripe -->
-        <div class="accent-stripe"></div>
-
-        <!-- Header -->
-        <div class="header">
-          <p class="inspection-label">// STATUS VERIFICATION - REPORT TO</p>
-          <h1 class="header-name">{{NAME}}</h1>
-          <p class="header-question">
-            Did it happen? &mdash; New rotation starts Tuesday.
-          </p>
-        </div>
-
-        <!-- Inspection status heading -->
-        <div class="section-row">
-          <span class="section-row-label">/// INSPECTION STATUS</span>
-          <span class="section-row-line"></span>
-          <span class="section-row-id">{{CHORE_NAME}}</span>
-        </div>
-
-        <!-- Status grid -->
-        <div class="status-grid">
-          <div class="status-cell status-cell-complete">
-            <div class="status-indicator">
-              <div class="status-dot-complete"></div>
-              <span class="status-indicator-label">CONFIRMED</span>
-            </div>
-            <div class="status-cell-title">All Done</div>
-            <p class="status-cell-desc">
-              Assignment completed -<br />logged and closed.
-            </p>
-          </div>
-          <div class="status-cell status-cell-pending">
-            <div class="status-indicator">
-              <div class="status-dot-pending"></div>
-              <span class="status-indicator-label">OUTSTANDING</span>
-            </div>
-            <div class="status-cell-title">Not Yet</div>
-            <p class="status-cell-desc">
-              Tonight still counts -<br />deadline: midnight.
-            </p>
-          </div>
-        </div>
-
-        <!-- Assignment summary heading -->
-        <div class="section-row">
-          <span class="section-row-label"
-            >/// WEEK {{WEEK_NUM}} ASSIGNMENTS</span
-          >
-          <span class="section-row-line"></span>
-        </div>
-
-        <!-- Primary chore row -->
-        <div class="assignment-row">
-          <div class="unit-badge">UNIT<br />A-01</div>
-          <div>
-            <div class="assignment-name">{{CHORE_NAME}}</div>
-            <div class="assignment-sub">Your assigned chore this week</div>
-          </div>
-          <div class="assignment-class">PRIMARY</div>
-        </div>
-
-        <!-- Hallways row -->
-        <div class="assignment-row">
-          <div class="unit-badge-outline">UNIT<br />S-01</div>
-          <div>
-            <div class="assignment-name">Hallways</div>
-            <div class="assignment-sub">
-              Everyone's chore &mdash; quick sweep
-            </div>
-          </div>
-          <div class="assignment-class">COLLECTIVE</div>
-        </div>
-
-        <!-- Directive -->
-        <div class="directive">
-          <p>
-            <strong>&gt;&gt;&gt; DIRECTIVE:</strong> IF SOMETHING CAME UP -
-            COMMUNICATE WITH THE HOUSE.
-            <strong>NO DRAMA. TRANSPARENCY IS THE PROTOCOL.</strong>
-          </p>
-        </div>
-
-        <!-- CTAs -->
-        <div class="cta-block">
-          <a class="cta-primary" href="https://autumn-legacy.site"
-            >[ UPDATE TRACKER &#8594; ]</a
-          >
-          <a
-            class="cta-secondary"
-            href="mailto:ps2245@cornell.edu?subject=Chore%20extension%20request%20-%20Week%20{{WEEK_NUM}}"
-            >[ REQUEST EXTENSION ]</a
-          >
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-          <span class="footer-text"
-            >HOUSE CHORES TRACKER &middot; WK-{{WEEK_NUM}} WRAP-UP &middot; NEW
-            ROTATION TUE</span
-          >
-          <span class="footer-rev">REV 1.0</span>
-        </div>
-      </div>
-    </div>
+  <body style="margin: 0; padding: 0; background: #F5F0E8; color: #242429;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #F5F0E8;">
+      <tr>
+        <td align="center" style="padding: 24px 12px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 640px; background: #ffffff; border: 4px solid #2A2A30; border-radius: 0;">
+            <tr>
+              <td style="padding: 0; background: #E8DED0; border-bottom: 4px solid #2A2A30;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="padding: 14px 18px; font-family: Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 1.44px; color: #242429; font-weight: 900; text-transform: uppercase;">PaperOps / Status Check</td>
+                    <td align="right" style="padding: 14px 18px; font-family: Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 1.44px; color: #242429; font-weight: 900; text-transform: uppercase;">WK-{{WEEK_NUM}}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 22px 20px 20px; background: #ffffff; border-bottom: 2px solid #2A2A30;">
+                <div style="font-family: Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 1.44px; color: #5C5C66; font-weight: 900; text-transform: uppercase;">Monday Closeout</div>
+                <h1 style="font-family: Arial, Helvetica, sans-serif; font-size: 44px; line-height: 43px; letter-spacing: -1.54px; color: #242429; font-weight: 950; margin: 10px 0 0; text-transform: uppercase;">{{NAME}}</h1>
+                <p style="font-family: Arial, Helvetica, sans-serif; font-size: 18px; line-height: 26px; color: #3F3F48; font-weight: 700; margin: 14px 0 0;">{{STATUS_SUMMARY}}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 18px 20px 4px; background: #F5F0E8; border-bottom: 2px solid #2A2A30;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="font-family: Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 1.44px; color: #242429; font-weight: 900; text-transform: uppercase; padding-bottom: 14px;">Task ledger</td>
+                    <td align="right" style="font-family: Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.96px; color: #5C5C66; font-weight: 800; text-transform: uppercase; padding-bottom: 14px;">Update required</td>
+                  </tr>
+                  {{PRIMARY_CHORE_ROWS}}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 20px; background: #ffffff;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #F5E6C8; border: 2px solid #2A2A30; border-radius: 0;">
+                  <tr>
+                    <td style="padding: 16px; font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 21px; color: #242429; font-weight: 700;">Tonight still counts. Mark each chore done, pending, or skipped before the next rotation starts Tuesday.</td>
+                    <td align="right" style="padding: 16px; white-space: nowrap;">
+                      <a href="https://autumn-legacy.site" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 18px; letter-spacing: 0.56px; color: #ffffff; background: #3B6BC0; border: 2px solid #2A2A30; padding: 12px 14px; text-decoration: none; font-weight: 900; text-transform: uppercase; display: inline-block;">Update Tracker</a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 14px 20px; background: #242429; color: #F5F0E8; font-family: Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 16px; letter-spacing: 0.96px; font-weight: 800; text-transform: uppercase;">Closeout Monday / New rotation Tuesday / Shape-first status marks</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

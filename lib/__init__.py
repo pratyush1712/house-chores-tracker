@@ -1,1 +1,1 @@
-# lib package - shared chore logic and database client
+# lib package - chore logic and database client

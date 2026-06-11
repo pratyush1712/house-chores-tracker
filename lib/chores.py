@@ -52,7 +52,7 @@ CHORE_TASKS: dict[str, list[str]] = {
     ],
 }
 
-CHORE_META: dict[str, dict[str, str | bool]] = {
+CHORE_META: dict[str, dict[str, str]] = {
     "Bathroom": {
         "color": "#7c3aed",
         "bg": "#f5f3ff",
@@ -60,7 +60,6 @@ CHORE_META: dict[str, dict[str, str | bool]] = {
         "accent": "#EDE9FF",
         "text_color": "#5B21B6",
         "icon": "bath",
-        "shared": False,
     },
     "Trash": {
         "color": "#ea580c",
@@ -69,7 +68,6 @@ CHORE_META: dict[str, dict[str, str | bool]] = {
         "accent": "#FFF0E0",
         "text_color": "#C2410C",
         "icon": "trash",
-        "shared": False,
     },
     "Kitchen": {
         "color": "#d97706",
@@ -78,7 +76,6 @@ CHORE_META: dict[str, dict[str, str | bool]] = {
         "accent": "#FFFAE0",
         "text_color": "#B45309",
         "icon": "kitchen",
-        "shared": False,
     },
     "Hallways": {
         "color": "#16a34a",
@@ -87,7 +84,6 @@ CHORE_META: dict[str, dict[str, str | bool]] = {
         "accent": "#E8F8EE",
         "text_color": "#15803D",
         "icon": "hallway",
-        "shared": True,
     },
 }
 
