@@ -4,6 +4,7 @@
 - Avoid excessive comments - only include non-obvious intent or constraints, never narrate what the code does.
 - Use double quotes for strings throughout Python and JS/HTML files.
 - No emojis anywhere in UI or email templates; replace with inline SVG icons.
+- No em dashes or en dashes in code, copy, comments, or agent chat; use `-` or spaced `-` instead.
 - Prefer a single parameterized function over two near-identical functions (e.g. `send_reminders(mode)` instead of `send_monday_reminders` / `send_sunday_reminders`).
 - Do not hardcode frontend presentation logic that duplicates server-side data (e.g. chore colors/names defined in both Python and JS); drive the UI from the API response.
 - Week date range runs Tuesday → Monday (chores assigned Tue, due Mon; trash pickup Mon).
