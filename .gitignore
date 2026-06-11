@@ -101,3 +101,4 @@ cython_debug/
 .agents
 .vercel
 .DS_Store
+.email-previews
