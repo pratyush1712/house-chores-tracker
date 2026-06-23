@@ -123,7 +123,13 @@ POOLS: dict[str, list[list[str]]] = {
 
 
 def get_week_number(today: date | None = None) -> int:
-    return max(0, ((today or date.today()) - HOUSE_START_DATE).days // 7)
+    # Chore weeks run Tuesday -> Monday. HOUSE_START_DATE is the Monday anchoring
+    # week 0, so a week must not roll over until its Tuesday; subtracting one day
+    # before the division moves the boundary off Monday and onto Tuesday. Without
+    # this, the Monday check-in (sent Monday evening) would point at the week that
+    # starts the next day instead of the one that ends that night.
+    delta_days = ((today or date.today()) - HOUSE_START_DATE).days
+    return max(0, (delta_days - 1) // 7)
 
 
 def get_assignees(chore: str, week_abs: int) -> list[str]:
