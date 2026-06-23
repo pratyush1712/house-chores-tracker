@@ -31,6 +31,9 @@ class WeekBoundaryTests(unittest.TestCase):
         self.assertNotIn("Trash", get_week_schedule(week_abs)["Pratyush"])
 
     def test_clamps_to_zero_before_first_week(self) -> None:
+        # Dates before HOUSE_START_DATE produce a negative delta and must clamp.
+        self.assertEqual(get_week_number(date(2026, 4, 27)), 0)
+        self.assertEqual(get_week_number(date(2026, 5, 3)), 0)
         self.assertEqual(get_week_number(date(2026, 5, 4)), 0)
         self.assertEqual(get_week_number(date(2026, 5, 5)), 0)
         self.assertEqual(get_week_number(date(2026, 5, 12)), 1)
